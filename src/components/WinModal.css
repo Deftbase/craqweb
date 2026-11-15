@@ -1,0 +1,230 @@
+.particle-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 50;
+}
+
+.win-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(4px);
+  animation: fade-in 0.4s;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+
+.win-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  font-size: 15px;
+  color: var(--text-dim);
+  background: var(--surface);
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+}
+
+.win-close:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.win-close:active {
+  transform: scale(0.9);
+}
+
+.win-review {
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--text-dim);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.win-review:hover {
+  color: var(--text);
+}
+
+.win-card {
+  position: relative;
+  width: min(460px, 100%);
+  padding: 30px 28px 26px;
+  border-radius: 24px;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid var(--edge);
+  box-shadow: 0 30px 80px rgba(28, 24, 48, 0.22);
+  animation: card-pop 0.55s cubic-bezier(0.2, 1.6, 0.4, 1);
+}
+
+@keyframes card-pop {
+  from { transform: scale(0.6) rotate(-4deg); opacity: 0; }
+}
+
+.win-kicker {
+  font-size: 12px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+}
+
+.win-title {
+  margin: 6px 0 16px;
+  font-family: var(--font-display);
+  font-weight: normal;
+  font-size: clamp(30px, 6vw, 44px);
+  color: var(--magenta);
+}
+
+.win-code {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.win-code span {
+  width: 56px;
+  height: 70px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  font-family: var(--font-display);
+  font-size: 36px;
+  color: #fff;
+  background: var(--bull);
+  box-shadow: 0 4px 0 #2f9a12;
+  animation: code-flip 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) backwards;
+}
+
+@keyframes code-flip {
+  from { transform: rotateX(90deg) scale(0.6); opacity: 0; }
+}
+
+.win-stats {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 16px;
+  align-items: center;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.win-stats div {
+  display: flex;
+  flex-direction: column;
+}
+
+.win-stats b {
+  font-family: var(--font-display);
+  font-weight: normal;
+  font-size: 32px;
+  color: var(--text);
+}
+
+.win-stats .win-rank {
+  font-size: 20px;
+  color: var(--violet);
+}
+
+.win-stats small {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+.win-stats .win-assist {
+  margin-top: 4px;
+  align-self: flex-start;
+  padding: 1px 8px;
+  border-radius: 99px;
+  color: var(--violet);
+  background: var(--surface-2);
+}
+
+.win-share {
+  margin: 18px 0 0;
+  font-family: inherit;
+  font-size: 20px;
+  line-height: 1.35;
+  letter-spacing: 1px;
+  white-space: pre;
+  text-align: center;
+}
+
+.win-btn {
+  margin-top: 20px;
+  width: 100%;
+  height: 58px;
+  border-radius: 16px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  letter-spacing: 1px;
+  color: #fff;
+  background: linear-gradient(90deg, var(--magenta), #ff7a3d);
+  box-shadow: 0 4px 0 #c21f62, 0 10px 24px rgba(255, 61, 139, 0.3);
+  transition: transform 0.1s, filter 0.2s;
+}
+
+.win-btn:hover {
+  filter: brightness(1.06);
+}
+
+.win-btn:active {
+  transform: translateY(4px) scale(0.98);
+}
+
+.win-lead {
+  margin: 0 0 16px;
+  color: var(--text);
+  font-size: 17px;
+  line-height: 1.35;
+}
+
+.win-hint-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.win-hint {
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+  color: var(--text-dim);
+}
+
+.win-assist-btn {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  letter-spacing: 0.6px;
+  color: #fff;
+  background: linear-gradient(90deg, var(--magenta), #ff7a3d);
+  box-shadow: 0 3px 0 #c21f62, 0 8px 16px rgba(255, 61, 139, 0.28);
+  cursor: pointer;
+}
+
+.win-assist-btn:hover {
+  filter: brightness(1.06);
+}
+
+.win-assist-btn:active {
+  transform: translateY(2px);
+}

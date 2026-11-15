@@ -1,0 +1,453 @@
+.vault {
+  position: relative;
+  width: min(100cqw, 100cqh, 680px);
+  aspect-ratio: 1;
+  flex-shrink: 0;
+}
+
+.vault[tabindex]:focus,
+.vault[tabindex]:focus-visible {
+  outline: none;
+}
+
+.vault-frame {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: none;
+  box-shadow: none;
+}
+
+/* The handle wheel: hub ring, spokes and grips turn as one piece. The shade
+   wrapper stays still so the drop shadow keeps pointing down while it spins. */
+.vault-handle-shade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.28));
+}
+
+.vault-handle {
+  position: absolute;
+  inset: 0;
+  transition: transform 0.9s cubic-bezier(0.2, 0.9, 0.2, 1.15);
+}
+
+.phase-unlocking .vault-handle,
+.phase-glow .vault-handle,
+.phase-burst .vault-handle {
+  transition: transform 1.3s cubic-bezier(0.5, -0.15, 0.25, 1.12);
+}
+
+/* A tug on the handle each guess: kick, spring back to rest. */
+.handle-jolt {
+  position: absolute;
+  inset: 0;
+}
+
+.handle-jolt.kick {
+  animation: handle-kick 0.6s 0.15s cubic-bezier(0.3, 0.7, 0.4, 1);
+}
+
+@keyframes handle-kick {
+  0% { transform: rotate(0); }
+  25% { transform: rotate(12deg); }
+  55% { transform: rotate(-4deg); }
+  80% { transform: rotate(1.5deg); }
+  100% { transform: rotate(0); }
+}
+
+/* Must stay outside the tumblers and breach bar (radius ~25% of the vault)
+   and inside the door edge (radius 36%). */
+.handle-hub {
+  position: absolute;
+  inset: 13%;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, transparent 92%, #a3a8b5 92.5%, #eef0f4 96%, #9aa0ae 100%, transparent 100%);
+}
+
+.handle-arm {
+  position: absolute;
+  inset: 0;
+}
+
+.handle-spoke {
+  position: absolute;
+  left: 50%;
+  top: 6.5%;
+  width: 2.4%;
+  height: 7%;
+  margin-left: -1.2%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #9aa0ae, #f4f5f8 45%, #a3a8b5);
+}
+
+.handle-grip {
+  position: absolute;
+  left: 50%;
+  top: -1.5%;
+  width: 7%;
+  height: 8.5%;
+  margin-left: -3.5%;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #9aa0ae, #ffffff 45%, #a3a8b5);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+  transition: background 0.4s 0.5s;
+}
+
+.phase-unlocking .handle-grip,
+.phase-glow .handle-grip,
+.phase-burst .handle-grip {
+  background: linear-gradient(90deg, #2f9a12, #8ee86a 45%, #2f9a12);
+}
+
+.vault-door {
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  container-type: size;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.85), transparent 45%),
+    radial-gradient(circle, var(--steel-1) 0%, var(--steel-2) 75%, var(--steel-3) 100%);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -10px 20px rgba(0, 0, 0, 0.15),
+    0 6px 16px rgba(28, 24, 48, 0.3);
+  transition: box-shadow 0.6s;
+}
+
+.phase-unlocking .vault-door,
+.phase-glow .vault-door,
+.phase-burst .vault-door {
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -10px 20px rgba(0, 0, 0, 0.15),
+    0 0 0 4px var(--bull),
+    0 16px 40px rgba(63, 194, 26, 0.35);
+}
+
+.vault-door .toast {
+  top: auto;
+  bottom: calc(50% + 11cqw);
+  z-index: 4;
+  max-width: 86%;
+  padding: 1.4cqw 2.6cqw;
+  border-radius: 2.4cqw;
+  border-width: 0.45cqw;
+  box-shadow: 0 1.2cqw 2.4cqw rgba(28, 24, 48, 0.16);
+}
+
+.vault-door .toast strong {
+  font-size: 5cqw;
+}
+
+.vault-door .toast span {
+  font-size: 3cqw;
+}
+
+.vault-door .toast-plain {
+  padding: 1.8cqw 2.8cqw;
+}
+
+.vault-door .toast-plain strong {
+  font-size: 5.4cqw;
+}
+
+/* Band between the inner hub ring and the centered tumblers. Kept outside
+   the door so overflow:hidden does not flatten the 3D spin. */
+.vault-demo {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 24%;
+  z-index: 6;
+  display: flex;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  pointer-events: none;
+}
+
+.vault-demo-scene {
+  pointer-events: auto;
+  display: block;
+  perspective: 520px;
+  perspective-origin: 50% 50%;
+  transform-style: preserve-3d;
+}
+
+.vault-demo-spin {
+  display: grid;
+  transform-style: preserve-3d;
+  transform-origin: center center;
+  animation: vault-demo-spin 7s linear infinite;
+}
+
+.vault-demo-layer,
+.vault-demo-face {
+  grid-area: 1 / 1;
+}
+
+.vault-demo-layer,
+.vault-demo-face {
+  border-radius: 999px;
+}
+
+.vault-demo-layer {
+  background-color: #c21f62;
+  background-image: linear-gradient(#ff5a8c, #c21f62 55%, #9a1448);
+}
+
+.vault-demo-face {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  color: #fff;
+  background: linear-gradient(90deg, #ff3d8b, #ff7a3d);
+  transform: translateZ(7px);
+}
+
+.vault-demo-back {
+  background: linear-gradient(90deg, #ff7a3d, #ff3d8b);
+  transform: rotateY(180deg) translateZ(7px);
+}
+
+.vault-demo:hover .vault-demo-face {
+  background: linear-gradient(90deg, #ff4d96, #ff8a4d);
+}
+
+@keyframes vault-demo-spin {
+  from { transform: rotateX(-8deg) rotateY(0deg); }
+  to { transform: rotateX(-8deg) rotateY(360deg); }
+}
+
+.tumblers {
+  position: relative;
+  display: flex;
+  gap: 2.2cqw;
+  padding: 2cqw;
+  border-radius: 9cqw;
+  background: var(--steel-dark);
+  box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.55), 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.tumblers[data-shudder='true'] .tumbler {
+  animation: tumbler-shudder 0.5s 0.28s;
+}
+
+.tumblers[data-shudder='true'] .tumbler:nth-child(2) {
+  animation-delay: 0.33s;
+}
+
+.tumblers[data-shudder='true'] .tumbler:nth-child(3) {
+  animation-delay: 0.38s;
+}
+
+.tumblers[data-shudder='true'] .tumbler:nth-child(4) {
+  animation-delay: 0.43s;
+}
+
+@keyframes tumbler-shudder {
+  0%, 100% { transform: translateY(0); }
+  20% { transform: translateY(-9%); }
+  40% { transform: translateY(6%); }
+  60% { transform: translateY(-3%); }
+  80% { transform: translateY(1.5%); }
+}
+
+.tumbler {
+  position: relative;
+  width: 14.5cqw;
+  height: 14.5cqw;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  font-family: var(--font-display);
+  color: #4d5262;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
+  background:
+    radial-gradient(circle at 38% 32%, rgba(255, 255, 255, 0.95), transparent 42%),
+    radial-gradient(circle at 50% 50%, #e8ebf1 0%, #d4d7e0 46%, #a9aebb 78%, #8e93a3 100%);
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2), inset 0 -2px 3px rgba(0, 0, 0, 0.16);
+  transition: box-shadow 0.15s, transform 0.12s;
+}
+
+.tumbler:active {
+  transform: scale(0.95);
+}
+
+.tumbler .digit {
+  font-family: var(--font-display);
+  font-size: 7.2cqw;
+  line-height: 1;
+  color: #4d5262;
+}
+
+.tumbler.filled .digit {
+  animation: digit-drop 0.22s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+@keyframes digit-drop {
+  from { transform: translateY(-60%) scale(1.3); opacity: 0; }
+}
+
+.tumbler .ghost {
+  font-family: var(--font-display);
+  font-size: 4.2cqw;
+  line-height: 1;
+  height: 4.2cqw;
+  color: rgba(28, 24, 48, 0.2);
+}
+
+.tumbler.revealed {
+  background: linear-gradient(#a9e68f, #eaffdf 50%, #a9e68f);
+  box-shadow: inset 0 0 0 2px var(--bull);
+}
+
+.tumbler.focused {
+  box-shadow:
+    0 0 0 3px var(--focus),
+    0 0 10px rgba(0, 168, 232, 0.55),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+.tumbler.rejected {
+  animation: reject-shake 0.35s;
+  box-shadow: inset 0 0 0 3px var(--magenta);
+}
+
+@keyframes reject-shake {
+  25% { transform: translateX(-12%); }
+  50% { transform: translateX(10%); }
+  75% { transform: translateX(-6%); }
+}
+
+.shutter {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.25) 0 2px, transparent 2px 9px),
+    linear-gradient(#9aa0ae, #5d6172);
+  transform-origin: top;
+  animation: shutter 0.62s cubic-bezier(0.7, 0, 0.3, 1) forwards;
+}
+
+@keyframes shutter {
+  0% { transform: scaleY(0); opacity: 1; }
+  40% { transform: scaleY(1); opacity: 1; }
+  60% { transform: scaleY(1); opacity: 1; }
+  100% { transform: scaleY(1); opacity: 0; }
+}
+
+/* Sits below the centered tumblers, narrow enough to stay inside the dashed ring. */
+.stress {
+  position: absolute;
+  left: 50%;
+  top: calc(50% + 15cqh);
+  width: 50%;
+  transform: translateX(-50%) scale(0.8);
+}
+
+.stress-label {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-display);
+  font-size: 4.2cqw;
+  letter-spacing: 0.3cqw;
+  color: #5d6172;
+  margin-bottom: 1.4cqw;
+}
+
+.stress-gain {
+  color: #8a8fa0;
+}
+
+.stress-gain.up {
+  color: #8a6208;
+  animation: gain-pop 0.5s 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) backwards;
+}
+
+@keyframes gain-pop {
+  from { opacity: 0; transform: scale(0.6); }
+}
+
+.stress-track {
+  position: relative;
+  height: 3.6cqw;
+  border-radius: 99px;
+  background: rgba(28, 24, 48, 0.18);
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.stress-fill {
+  position: relative;
+  height: 100%;
+  border-radius: inherit;
+  overflow: hidden;
+  background: linear-gradient(90deg, #e2b03a, #f5c542 45%, #c99212);
+  transition: width 0.9s cubic-bezier(0.2, 0.9, 0.2, 1.1);
+}
+
+/* Lighter tip for the latest gain, faded into the same rounded bar. */
+.stress-new {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 246, 210, 0.95) 45%);
+  transform-origin: left;
+  animation:
+    gain-grow 0.7s 0.4s cubic-bezier(0.2, 0.9, 0.2, 1.1) backwards,
+    gain-pulse 1.4s 1.1s ease-in-out infinite;
+}
+
+@keyframes gain-grow {
+  from { transform: scaleX(0); }
+}
+
+@keyframes gain-pulse {
+  50% { opacity: 0.6; }
+}
+
+.vault-core {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(circle, #fff 0%, rgba(255, 240, 180, 0.95) 20%, rgba(255, 200, 61, 0.55) 42%, rgba(63, 194, 26, 0.12) 65%, transparent 75%);
+  transform: scale(0.2);
+  transition: opacity 0.7s, transform 0.9s cubic-bezier(0.2, 0.9, 0.2, 1.2);
+}
+
+.phase-glow .vault-core,
+.phase-burst .vault-core {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.phase-burst .vault-core {
+  animation: core-settle 3.2s ease-out forwards;
+}
+
+@keyframes core-settle {
+  0% { opacity: 1; transform: scale(1.1); }
+  25% { opacity: 1; transform: scale(1.18); filter: brightness(1.1); }
+  100% { opacity: 0.12; transform: scale(1.1); }
+}
