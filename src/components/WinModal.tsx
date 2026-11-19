@@ -22,6 +22,8 @@ interface Props {
   onNext?: () => void;
   lead?: string;
   nextHint?: string;
+  /** Daily streak on this browser. Absent in Practice. */
+  streakLabel?: string;
 }
 
 function heistGift(guesses: number) {
@@ -51,6 +53,7 @@ export function WinModal({
   onNext,
   lead,
   nextHint,
+  streakLabel,
 }: Props) {
   const { title, blurb, tag } = rank(guesses);
   const assistSecond = Boolean(nextHint && onNext && nextLabel);
@@ -109,6 +112,7 @@ export function WinModal({
           ))}
         </div>
         <p className="win-meta">{meta}</p>
+        {streakLabel && <p className="win-streak">{streakLabel}</p>}
         <div className="win-rank">
           <span className={`win-rank-tag win-rank-tag-${tag}`}>{title}</span>
           <small>{blurb}</small>

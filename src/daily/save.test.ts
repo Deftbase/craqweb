@@ -20,11 +20,11 @@ describe('daily share', () => {
     expect(shareMarks(0, 0)).toEqual(['miss']);
     expect(shareMarks(1, 1)).toEqual(['bull', 'cow']);
     expect(shareMarks(4, 0)).toEqual(['bull', 'bull', 'bull', 'bull']);
-    expect(shareRow(0, 0)).toBe('·');
-    expect(shareRow(1, 0)).toBe('🟩');
-    expect(shareRow(1, 1)).toBe('🟩🟨');
-    expect(shareRow(2, 1)).toBe('🟩🟩🟨');
-    expect(shareRow(4, 0)).toBe('🟩🟩🟩🟩');
+    expect(shareRow(0, 0)).toBe('⚪');
+    expect(shareRow(1, 0)).toBe('🟢');
+    expect(shareRow(1, 1)).toBe('🟢🟡');
+    expect(shareRow(2, 1)).toBe('🟢🟢🟡');
+    expect(shareRow(4, 0)).toBe('🟢🟢🟢🟢');
   });
 
   it('writes the staircase, caption, and play-break-in link', () => {
@@ -39,10 +39,10 @@ describe('daily share', () => {
       [
         'CRAQ 4 tries · 02:06 · Medium',
         '',
-        '🟩',
-        '🟩🟨',
-        '🟩🟩🟨',
-        '🟩🟩🟩🟩',
+        '🟢',
+        '🟢🟡',
+        '🟢🟢🟡',
+        '🟢🟢🟢🟢',
         '',
         'Play your break in',
         'https://craq.example/#heist=10-11-21-40',
@@ -52,8 +52,8 @@ describe('daily share', () => {
 
   it('uses a single green row and the singular try for a one-try win', () => {
     const text = dailyShare([{ bulls: 4, cows: 0 }], '00:41', 'Solo');
-    expect(text).toContain('🟩🟩🟩🟩');
-    expect(text).toBe('CRAQ 1 try · 00:41 · Solo\n\n🟩🟩🟩🟩');
+    expect(text).toContain('🟢🟢🟢🟢');
+    expect(text).toBe('CRAQ 1 try · 00:41 · Solo\n\n🟢🟢🟢🟢');
     expect(text).not.toContain('tries');
   });
 

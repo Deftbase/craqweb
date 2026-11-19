@@ -92,10 +92,10 @@
 
 .win-code span {
   width: 52px;
-  height: 64px;
+  height: 52px;
   display: grid;
   place-items: center;
-  border-radius: 12px;
+  border-radius: 50%;
   font-family: var(--font-display);
   font-size: 32px;
   color: #7a5200;
@@ -114,6 +114,13 @@
   color: var(--text-dim);
   font-size: 13px;
   line-height: 1.4;
+}
+
+.win-streak {
+  margin: 8px 0 0;
+  font-size: 12px;
+  letter-spacing: 1.2px;
+  color: var(--text);
 }
 
 .win-rank {

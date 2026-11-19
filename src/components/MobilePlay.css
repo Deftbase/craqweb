@@ -1,0 +1,267 @@
+.mobile-play {
+  position: relative;
+  min-height: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 0 0 12px;
+}
+
+.mobile-vault {
+  position: relative;
+  width: min(100%, 420px);
+  aspect-ratio: 1;
+  overflow: hidden;
+  container-type: size;
+}
+
+.mobile-rig {
+  position: absolute;
+  left: calc(50% - var(--cx));
+  top: calc(50% - var(--cy));
+  flex-shrink: 0;
+  transform: scale(min(1, 100cqw / var(--span), 100cqh / var(--span)));
+  transform-origin: var(--cx) var(--cy);
+}
+
+.mobile-rig .vault {
+  position: absolute;
+  left: var(--cx);
+  top: var(--cy);
+  width: 360px;
+  height: 360px;
+  margin: -180px 0 0 -180px;
+}
+
+.mobile-log {
+  width: min(100%, 420px);
+  min-height: 0;
+}
+
+.mobile-log .ledger-panel {
+  width: 100%;
+  max-height: min(46vh, 360px);
+  padding: 10px 10px 8px;
+}
+
+.mobile-log .panel-title {
+  margin: 0 0 6px;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+.mobile-log .ledger-list {
+  gap: 4px;
+  padding: 2px 0 0;
+  max-height: min(38vh, 300px);
+}
+
+.mobile-log .ledger-row {
+  gap: 6px;
+  padding: 4px 6px;
+  border-radius: 8px;
+}
+
+.mobile-log .ledger-idx {
+  font-size: 9px;
+}
+
+.mobile-log .ledger-digits {
+  gap: 2px;
+}
+
+.mobile-log .ledger-digit {
+  width: 22px;
+  height: 26px;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.mobile-log .ledger-draft .ledger-digit.focused {
+  box-shadow: inset 0 -2px 0 var(--focus);
+}
+
+.mobile-log .ledger-score {
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+
+.mobile-log .badge {
+  width: auto;
+  min-width: 0;
+  padding: 2px 6px;
+  font-size: 9px;
+}
+
+.mobile-log .ledger-tag {
+  top: -6px;
+  right: 8px;
+  padding: 0 5px;
+  font-size: 8px;
+}
+
+.mobile-log .ledger-empty {
+  gap: 6px;
+  font-size: 12px;
+}
+
+.mobile-log .ledger-empty-lead {
+  font-size: 14px;
+}
+
+@keyframes mobile-how-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.mobile-play .how-to.mobile-how-to {
+  --how-badge-w: 84px;
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  z-index: 8;
+  width: min(100%, 420px);
+  height: auto;
+  max-height: none;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px 14px;
+  pointer-events: auto;
+  border-radius: 18px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.58);
+  box-shadow: 0 12px 32px rgba(28, 24, 48, 0.12);
+  backdrop-filter: blur(14px);
+  transform: translate(-50%, 0);
+  animation: mobile-how-in 0.45s ease-out;
+}
+
+.mobile-how-to-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 2;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 12px;
+  line-height: 1;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.mobile-how-to-close:active {
+  transform: scale(0.9);
+}
+
+.mobile-play .how-to.mobile-how-to .panel-title {
+  margin: 0 28px 0 0;
+  font-size: 13px;
+  letter-spacing: 1px;
+}
+
+.mobile-how-to p {
+  font-size: 12px;
+}
+
+.mobile-how-to .how-keys {
+  font-size: 11px;
+  gap: 2px;
+}
+
+.mobile-play .how-to.mobile-how-to .how-key {
+  grid-template-columns: var(--how-badge-w) minmax(0, 1fr);
+  column-gap: 6px;
+  align-items: start;
+}
+
+.mobile-play .how-to.mobile-how-to .how-keys .badge,
+.mobile-play .how-to.mobile-how-to .how-example .badge {
+  width: var(--how-badge-w);
+  box-sizing: border-box;
+  padding: 2px 7px;
+  font-size: 9px;
+  letter-spacing: 0;
+  overflow: visible;
+}
+
+.mobile-play .how-to.mobile-how-to .how-example {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  justify-content: stretch;
+  column-gap: 6px;
+  padding: 4px 6px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: visible;
+  background: #fff;
+}
+
+.mobile-play .how-to.mobile-how-to .how-example .ledger-idx {
+  font-size: 9px;
+}
+
+.mobile-play .how-to.mobile-how-to .how-example .ledger-digits {
+  gap: 2px;
+  min-width: 0;
+}
+
+.mobile-play .how-to.mobile-how-to .how-example .ledger-digits span {
+  width: clamp(16px, 5.2vw, 22px);
+  height: clamp(20px, 6.2vw, 26px);
+  border-radius: 5px;
+  font-size: clamp(11px, 3.4vw, 14px);
+}
+
+.mobile-play .how-to.mobile-how-to .how-example .ledger-score {
+  display: grid;
+  flex-direction: column;
+  align-items: stretch;
+  justify-items: stretch;
+  width: var(--how-badge-w);
+  max-width: 100%;
+  min-width: 0;
+  margin-left: 0;
+  gap: 2px;
+}
+
+.mobile-how-to .how-tour {
+  margin-top: 8px;
+  gap: 6px;
+}
+
+.mobile-how-to .how-demo {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.mobile-how-to .how-try,
+.mobile-how-to .how-assist-link,
+.mobile-how-to .how-dot {
+  font-size: 11px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mobile-play .how-to.mobile-how-to {
+    animation: none;
+    transform: translate(-50%, 0);
+  }
+}

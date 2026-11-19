@@ -90,11 +90,11 @@ export function shareMarks(bulls: number, cows: number): ShareMark[] {
   ];
 }
 
-/** One staircase row: greens for digits in place, yellows for misplaced, a dot when the guess missed. */
+/** One staircase row: green circles in place, yellow misplaced, a white circle when the guess missed. */
 export function shareRow(bulls: number, cows: number): string {
   const marks = shareMarks(bulls, cows);
-  if (marks.length === 1 && marks[0] === 'miss') return '·';
-  return marks.map((mark) => (mark === 'bull' ? '🟩' : '🟨')).join('');
+  if (marks.length === 1 && marks[0] === 'miss') return '⚪';
+  return marks.map((mark) => (mark === 'bull' ? '🟢' : '🟡')).join('');
 }
 
 /** Packed bulls/cows per guess, spoiler-free. */

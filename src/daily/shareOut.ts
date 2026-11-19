@@ -135,25 +135,16 @@ async function renderShareGridPng(payload: SharePayload): Promise<Blob | null> {
 }
 
 function drawMark(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, mark: ShareMark) {
+  ctx.beginPath();
+  ctx.arc(x + size / 2, y + size / 2, size / 2 - 1, 0, Math.PI * 2);
   if (mark === 'miss') {
-    ctx.fillStyle = MISS;
-    ctx.beginPath();
-    ctx.arc(x + size / 2, y + size / 2, 6, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
     ctx.fill();
+    ctx.strokeStyle = MISS;
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
     return;
   }
   ctx.fillStyle = mark === 'bull' ? BULL : COW;
-  roundRect(ctx, x, y, size, size, 8);
   ctx.fill();
-}
-
-function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
-  const radius = Math.min(r, w / 2, h / 2);
-  ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.arcTo(x + w, y, x + w, y + h, radius);
-  ctx.arcTo(x + w, y + h, x, y + h, radius);
-  ctx.arcTo(x, y + h, x, y, radius);
-  ctx.arcTo(x, y, x + w, y, radius);
-  ctx.closePath();
 }

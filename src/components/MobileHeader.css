@@ -1,0 +1,87 @@
+/* Phone chrome only. Desktop .header stays in theme.css. */
+
+.header.header-phone {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  --chip-fs: clamp(9px, 2.6vw, 11px);
+  --mode-fs: clamp(9px, 2.5vw, 11px);
+}
+
+.header-phone .logo {
+  font-size: clamp(16px, 5vw, 22px);
+  line-height: 1;
+}
+
+.header-phone-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  align-items: stretch;
+  width: 100%;
+}
+
+.header-phone-row-modes {
+  grid-template-columns: max-content minmax(0, 1fr) minmax(0, 1fr);
+}
+
+.header-phone-slot {
+  display: block;
+  min-height: 0;
+}
+
+.header-phone .mode-switch {
+  width: max-content;
+  max-width: 100%;
+  justify-content: center;
+  padding: 2px;
+}
+
+.header-phone .mode-switch button {
+  flex: 0 0 auto;
+  min-width: max-content;
+  overflow: visible;
+  padding: 5px 6px;
+  font-size: var(--mode-fs);
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.header-phone .chip-btn,
+.header-phone .daily-clock {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  padding: 6px 6px;
+  font-size: var(--chip-fs);
+  letter-spacing: 0.15px;
+}
+
+.header-phone .sound-btn {
+  justify-items: center;
+}
+
+.header-phone .assist-btn {
+  gap: 4px;
+}
+
+.header-phone .assist-bars {
+  flex: 0 0 auto;
+  height: 11px;
+  gap: 1px;
+}
+
+.header-phone .assist-bars span {
+  width: 3px;
+}
+
+.header-phone .assist-tip {
+  display: none;
+}
+
+.header-phone .assist-btn.cue .assist-tip {
+  display: block;
+}

@@ -26,6 +26,7 @@ import {
   todaySave,
   type GameMode,
 } from './daily/save';
+import { loadStreak, recordDailyWin, streakLine, visibleStreak } from './daily/streak';
 import { loadTour, markTourDone } from './tour/save';
 import {
   assistPhase,
@@ -45,7 +46,10 @@ import { CoinBelt, CX, CY, LOG_TIP_X, LOG_TIP_Y, RIG_H, RIG_W } from './componen
 import { Ledger } from './components/Ledger';
 import { ParticleBurst } from './components/ParticleBurst';
 import { HeistListen } from './components/HeistListen';
+import { MobileHeader } from './components/MobileHeader';
+import { MobilePlay } from './components/MobilePlay';
 import { WinModal } from './components/WinModal';
+import { usePhone } from './layout/usePhone';
 import './App.css';
 
 interface Toast {
@@ -85,6 +89,11 @@ export default function App() {
   const [clock, setClock] = useState(() => clockFromDaily(mode === 'daily' ? todaySave() : null));
   const [now, setNow] = useState(() => Date.now());
   const [heistListen, setHeistListen] = useState(() => heistFromHash());
+  const [streak, setStreak] = useState(() => {
+    const today = dayKey();
+    if (todaySave()?.finished) return recordDailyWin(today).current;
+    return visibleStreak(loadStreak(), today);
+  });
   const versusRef = useRef<GameState | null>(null);
   const dailyDayRef = useRef(todaySave()?.day ?? dayKey());
   const vaultRef = useRef<HTMLDivElement>(null);
@@ -107,14 +116,30 @@ export default function App() {
     origin: null,
   });
 
+  const phone = usePhone();
   const playing = state.status === 'playing';
   const lastResult = state.history[state.history.length - 1];
   const hasGuess = state.history.length > 0;
   const [armExtended, setArmExtended] = useState(() => boot.history.length > 0);
   const [logShown, setLogShown] = useState(() => boot.history.length > 0);
-  const [helpOpen, setHelpOpen] = useState(
-    () => boot.history.length === 0 && !demoAvailable && loadMode() !== 'daily',
-  );
+  const [helpOpen, setHelpOpen] = useState(() => {
+    const isPhone = typeof window !== 'undefined' && window.matchMedia('(max-width: 560px)').matches;
+    if (isPhone) return false;
+    return boot.history.length === 0 && !demoAvailable && loadMode() !== 'daily';
+  });
+  const helpDelayRef = useRef(0);
+  const clearHelpDelay = () => {
+    window.clearTimeout(helpDelayRef.current);
+    helpDelayRef.current = 0;
+  };
+  const closeHelp = () => {
+    clearHelpDelay();
+    setHelpOpen(false);
+  };
+  const toggleHelp = () => {
+    clearHelpDelay();
+    setHelpOpen((open) => !open);
+  };
   const [tourSlide, setTourSlide] = useState(0);
   const [tourPlaying, setTourPlaying] = useState(false);
   const tourPlayingRef = useRef(tourPlaying);
@@ -138,12 +163,18 @@ export default function App() {
 
   useEffect(() => {
     if (tour) return;
-    if (demoAvailable) {
+    if (demoAvailable || hasGuess) {
+      clearHelpDelay();
       setHelpOpen(false);
       return;
     }
-    setHelpOpen(!hasGuess);
-  }, [hasGuess, tour, demoAvailable]);
+    if (phone) {
+      clearHelpDelay();
+      helpDelayRef.current = window.setTimeout(() => setHelpOpen(true), 1000);
+      return () => clearHelpDelay();
+    }
+    setHelpOpen(true);
+  }, [hasGuess, tour, demoAvailable, phone]);
 
   useEffect(() => {
     if (tour === 'unlock' || tour === 'assist') setAssist('solo');
@@ -302,6 +333,7 @@ export default function App() {
     setTour(kind);
     setAssist('solo');
     setPeakAssist('solo');
+    clearHelpDelay();
     setHelpOpen(false);
     setTourSlide(0);
     setTourPlaying(false);
@@ -316,6 +348,7 @@ export default function App() {
     if (restoreAssist) setAssist(prevAssistRef.current);
     if (random) {
       setPeakAssist(restoreAssist ? prevAssistRef.current : assistRef.current);
+      clearHelpDelay();
       setHelpOpen(true);
       resetBoard(randomCode());
     }
@@ -391,6 +424,7 @@ export default function App() {
   useEffect(() => {
     if (mode !== 'daily' || state.status === 'playing' || clock.finished) return;
     setClock((c) => ({ ...c, lastSeen: Date.now(), finished: true }));
+    if (state.status === 'won') setStreak(recordDailyWin(dayKey()).current);
   }, [mode, state.status, clock.finished]);
 
   useEffect(() => {
@@ -417,6 +451,7 @@ export default function App() {
       dailyDayRef.current = today;
       actions.restore(createGame(dailyCode(today)));
       setClock(idleClock());
+      setStreak(visibleStreak(loadStreak(), today));
       setPeakAssist(assistRef.current);
       setPhase('idle');
       setToast(null);
@@ -579,6 +614,44 @@ export default function App() {
 
   return (
     <div className={`app ${shake}`}>
+      {phone ? (
+        <MobileHeader
+          mode={mode}
+          onSwitchMode={switchMode}
+          helpOpen={helpOpen}
+          onToggleHelp={() => {
+            sfx.key();
+            toggleHelp();
+            refocus();
+          }}
+          showResults={state.status === 'won' && !resultsOpen}
+          onResults={() => setResultsOpen(true)}
+          assist={assist}
+          assistCue={Boolean(assistWalk?.cueAssist)}
+          onAssist={() => {
+            if (tour === 'assist') {
+              if (!assistWalk?.cueAssist || !assistWalk.need) return;
+              sfx.key();
+              setAssist(assistWalk.need);
+              refocus();
+              return;
+            }
+            if (tour) return;
+            sfx.key();
+            setAssist(nextAssist(assist));
+            refocus();
+          }}
+          muted={muted}
+          onToggleMute={() => {
+            setMuted(!muted);
+            refocus();
+          }}
+          dayLabel={dayKey().slice(5)}
+          clockLabel={formatClock(shownMs)}
+          streak={mode === 'daily' ? streak : 0}
+          onNewGame={handleNewGame}
+        />
+      ) : (
       <header className="header">
         <div className="brand">
           <h1 className="logo">
@@ -600,7 +673,7 @@ export default function App() {
             aria-expanded={helpOpen}
             onClick={() => {
               sfx.key();
-              setHelpOpen((open) => !open);
+              toggleHelp();
               refocus();
             }}
           >
@@ -647,6 +720,7 @@ export default function App() {
           {mode === 'daily' ? (
             <span className="daily-clock" title="Today's shared vault">
               {dayKey().slice(5)} · <span className="daily-time">{formatClock(shownMs)}</span>
+              {streak > 0 ? ` · ${streak}` : ''}
             </span>
           ) : (
             <button type="button" className="chip-btn hot" onClick={handleNewGame}>
@@ -655,8 +729,62 @@ export default function App() {
           )}
         </div>
       </header>
+      )}
 
       <main className="main">
+        {phone ? (
+          <MobilePlay
+            state={state}
+            spectrum={spectrum}
+            assist={assist}
+            playing={playing}
+            highlight={highlight}
+            onHighlight={setHighlight}
+            phase={phase}
+            reject={reject}
+            toast={toast}
+            breach={breach}
+            breachBefore={breachBefore}
+            onDigit={(d) => {
+              handleDigit(d);
+              refocus();
+            }}
+            onSubmit={handleSubmit}
+            onFocusSlot={handleFocusSlot}
+            tour={tour}
+            tourPlaying={tourPlaying}
+            tourSlide={tourSlide}
+            walk={walk}
+            assistWalk={assistWalk}
+            onTourNext={() => {
+              sfx.key();
+              if (!walk) return;
+              if (tourSlide >= walk.slides.length - 1) setTourPlaying(true);
+              else setTourSlide((n) => n + 1);
+            }}
+            onTourBack={() => {
+              sfx.key();
+              setTourSlide((n) => Math.max(0, n - 1));
+            }}
+            onTourSkip={() => endTour(true, true)}
+            helpOpen={helpOpen}
+            demoAvailable={demoAvailable}
+            mode={mode}
+            hasGuess={hasGuess}
+            onPlayDemo={() => beginTour('unlock')}
+            onTryGame={() => {
+              closeHelp();
+              refocus();
+            }}
+            onCloseHelp={() => {
+              sfx.key();
+              closeHelp();
+              refocus();
+            }}
+            onAssistTour={() => beginTour('assist')}
+            vaultRef={vaultRef}
+          />
+        ) : (
         <div className="play-area">
           <div className="vault-stage">
             <div
@@ -802,6 +930,7 @@ export default function App() {
             </div>
           </div>
         </div>
+        )}
       </main>
 
       <ParticleBurst trigger={burst.trigger} origin={burst.origin} />
@@ -812,6 +941,7 @@ export default function App() {
           guesses={state.history.length}
           assist={peakAssist}
           timeLabel={mode === 'daily' ? formatClock(shownMs) : undefined}
+          streakLabel={mode === 'daily' ? streakLine(streak) : undefined}
           againLabel={
             mode === 'daily'
               ? 'PLAY PRACTICE'
