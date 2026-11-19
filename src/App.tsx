@@ -14,14 +14,15 @@ import {
 } from './engine';
 import {
   clockFromDaily,
-  dailyShare,
   formatClock,
   gameForMode,
+  dailyCrackedToday,
+  heistFromHash,
+  heistListenUrl,
   idleClock,
   loadMode,
   saveDaily,
   saveMode,
-  shareRow,
   todaySave,
   type GameMode,
 } from './daily/save';
@@ -43,6 +44,7 @@ import { VaultDoor, type VaultPhase } from './components/VaultDoor';
 import { CoinBelt, CX, CY, LOG_TIP_X, LOG_TIP_Y, RIG_H, RIG_W } from './components/CoinBelt';
 import { Ledger } from './components/Ledger';
 import { ParticleBurst } from './components/ParticleBurst';
+import { HeistListen } from './components/HeistListen';
 import { WinModal } from './components/WinModal';
 import './App.css';
 
@@ -82,7 +84,7 @@ export default function App() {
   );
   const [clock, setClock] = useState(() => clockFromDaily(mode === 'daily' ? todaySave() : null));
   const [now, setNow] = useState(() => Date.now());
-  const [shared, setShared] = useState(false);
+  const [heistListen, setHeistListen] = useState(() => heistFromHash());
   const versusRef = useRef<GameState | null>(null);
   const dailyDayRef = useRef(todaySave()?.day ?? dayKey());
   const vaultRef = useRef<HTMLDivElement>(null);
@@ -269,7 +271,6 @@ export default function App() {
     setPhase('idle');
     setToast(null);
     setHighlight(null);
-    setShared(false);
     setResultsOpen(true);
     setArmExtended(false);
     setLogShown(false);
@@ -368,7 +369,6 @@ export default function App() {
     setPhase('idle');
     setToast(null);
     setHighlight(null);
-    setShared(false);
     setResultsOpen(nextState.status !== 'won');
     if (next === 'daily') {
       const save = todaySave();
@@ -421,7 +421,6 @@ export default function App() {
       setPhase('idle');
       setToast(null);
       setHighlight(null);
-      setShared(false);
       setResultsOpen(true);
     };
     const id = window.setInterval(roll, 15000);
@@ -570,6 +569,12 @@ export default function App() {
 
   useEffect(() => {
     refocus();
+  }, []);
+
+  useEffect(() => {
+    const sync = () => setHeistListen(heistFromHash());
+    window.addEventListener('hashchange', sync);
+    return () => window.removeEventListener('hashchange', sync);
   }, []);
 
   return (
@@ -801,7 +806,7 @@ export default function App() {
 
       <ParticleBurst trigger={burst.trigger} origin={burst.origin} />
 
-      {state.status === 'won' && resultsOpen && (
+      {state.status === 'won' && resultsOpen && !heistListen && (
         <WinModal
           secret={state.secret}
           guesses={state.history.length}
@@ -820,22 +825,40 @@ export default function App() {
           nextHint={tour === 'unlock' ? 'See how hints work:' : undefined}
           nextLabel={tour === 'unlock' ? 'TRY ASSIST' : undefined}
           onNext={tour === 'unlock' ? () => beginTour('assist') : undefined}
-          shareRows={mode === 'daily' ? state.history.map((guess) => shareRow(guess.bulls, guess.cows)) : undefined}
-          onShare={
+          tuneScores={mode === 'daily' ? state.history : undefined}
+          sharePayload={
             mode === 'daily'
-              ? () => {
-                  const text = dailyShare(state.history, dayKey(), formatClock(shownMs), ASSIST_NAMES[peakAssist]);
-                  void navigator.clipboard.writeText(text).then(() => setShared(true));
+              ? {
+                  history: state.history,
+                  day: dayKey(),
+                  clockLabel: formatClock(shownMs),
+                  assistName: ASSIST_NAMES[peakAssist],
+                  listenUrl: heistListenUrl(state.history),
                 }
               : undefined
           }
-          shared={shared}
           onPlayAgain={
             mode === 'daily' ? () => switchMode('versus') : tour ? () => endTour(true, tour === 'unlock') : handleNewGame
           }
           onClose={() => {
             setResultsOpen(false);
             refocus();
+          }}
+        />
+      )}
+
+      {heistListen && (
+        <HeistListen
+          scores={heistListen}
+          crackedToday={dailyCrackedToday() || (mode === 'daily' && state.status !== 'playing')}
+          onClose={() => {
+            setHeistListen(null);
+            window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+          }}
+          onPlayToday={() => {
+            setHeistListen(null);
+            window.history.replaceState(null, '', `${window.location.pathname}${window.location.search}`);
+            if (mode !== 'daily') switchMode('daily');
           }}
         />
       )}

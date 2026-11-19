@@ -48,6 +48,11 @@ export function todaySave(): DailySave | null {
   return save?.day === dayKey() ? save : null;
 }
 
+/** This browser already won today's daily. Practice / other devices do not count. */
+export function dailyCrackedToday(save: DailySave | null = todaySave()): boolean {
+  return save?.finished === true;
+}
+
 export function elapsedMs(save: Pick<DailySave, 'startedAt' | 'pausedMs' | 'lastSeen' | 'finished'>, now = Date.now()): number {
   if (!save.startedAt) return 0;
   const end = save.finished ? save.lastSeen : now;
@@ -72,24 +77,68 @@ export function clockFromDaily(save: DailySave | null, at = Date.now()) {
   };
 }
 
-/** One staircase row: greens for digits in place, yellows for misplaced, a dot when the guess missed. */
-export function shareRow(bulls: number, cows: number): string {
+export type ShareMark = 'bull' | 'cow' | 'miss';
+
+/** Packed marks for one guess. Misses are a single dot, not four empty slots. */
+export function shareMarks(bulls: number, cows: number): ShareMark[] {
   const placed = Math.max(0, bulls);
   const misplaced = Math.max(0, cows);
-  if (placed === 0 && misplaced === 0) return '·';
-  return '🟩'.repeat(placed) + '🟨'.repeat(misplaced);
+  if (placed === 0 && misplaced === 0) return ['miss'];
+  return [
+    ...Array.from({ length: placed }, () => 'bull' as const),
+    ...Array.from({ length: misplaced }, () => 'cow' as const),
+  ];
+}
+
+/** One staircase row: greens for digits in place, yellows for misplaced, a dot when the guess missed. */
+export function shareRow(bulls: number, cows: number): string {
+  const marks = shareMarks(bulls, cows);
+  if (marks.length === 1 && marks[0] === 'miss') return '·';
+  return marks.map((mark) => (mark === 'bull' ? '🟩' : '🟨')).join('');
+}
+
+/** Packed bulls/cows per guess, spoiler-free. */
+export function encodeHeist(history: readonly { bulls: number; cows: number }[]): string {
+  return history.map((guess) => `${guess.bulls}${guess.cows}`).join('-');
+}
+
+export function decodeHeist(code: string): { bulls: number; cows: number }[] | null {
+  if (!code) return null;
+  const rows: { bulls: number; cows: number }[] = [];
+  for (const part of code.split('-')) {
+    if (!/^[0-4][0-4]$/.test(part)) return null;
+    const bulls = Number(part[0]);
+    const cows = Number(part[1]);
+    if (bulls + cows > 4) return null;
+    rows.push({ bulls, cows });
+  }
+  return rows.length ? rows : null;
+}
+
+export function heistFromHash(hash = typeof window === 'undefined' ? '' : window.location.hash) {
+  const match = hash.match(/^#heist=([0-4][0-4](?:-[0-4][0-4])*)$/);
+  return match ? decodeHeist(match[1]) : null;
+}
+
+export function heistListenUrl(history: readonly { bulls: number; cows: number }[], origin?: string) {
+  const base =
+    origin ??
+    (typeof window === 'undefined' ? '' : `${window.location.origin}${window.location.pathname}`);
+  return `${base}#heist=${encodeHeist(history)}`;
 }
 
 /** Clipboard text for a finished daily. Digits stay off the share. */
 export function dailyShare(
   history: readonly { bulls: number; cows: number }[],
-  day: string,
   clockLabel: string,
   assistName: string,
+  listenUrl?: string,
 ): string {
   const tries = history.length === 1 ? '1 try' : `${history.length} tries`;
   const rows = history.map((guess) => shareRow(guess.bulls, guess.cows)).join('\n');
-  return `CRAQ\nDaily ${day}\n\n${rows}\n\n${tries} · ${clockLabel} · ${assistName}`;
+  const header = `CRAQ ${tries} · ${clockLabel} · ${assistName}`;
+  if (!listenUrl) return `${header}\n\n${rows}`;
+  return `${header}\n\n${rows}\n\nPlay your break in\n${listenUrl}`;
 }
 
 export function formatClock(ms: number): string {

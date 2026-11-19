@@ -14,6 +14,7 @@
   display: grid;
   place-items: center;
   padding: 20px;
+  overflow-y: auto;
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(4px);
   animation: fade-in 0.4s;
@@ -60,7 +61,7 @@
 .win-card {
   position: relative;
   width: min(460px, 100%);
-  padding: 30px 28px 26px;
+  padding: 28px 24px 22px;
   border-radius: 24px;
   text-align: center;
   background: #ffffff;
@@ -73,17 +74,12 @@
   from { transform: scale(0.6) rotate(-4deg); opacity: 0; }
 }
 
-.win-kicker {
-  font-size: 12px;
-  letter-spacing: 3px;
-  color: var(--text-dim);
-}
-
 .win-title {
-  margin: 6px 0 16px;
+  margin: 0 0 14px;
   font-family: var(--font-display);
   font-weight: normal;
-  font-size: clamp(30px, 6vw, 44px);
+  font-size: clamp(22px, 5vw, 32px);
+  line-height: 1.1;
   color: var(--magenta);
 }
 
@@ -91,20 +87,21 @@
   display: flex;
   justify-content: center;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
 }
 
 .win-code span {
-  width: 56px;
-  height: 70px;
+  width: 52px;
+  height: 64px;
   display: grid;
   place-items: center;
   border-radius: 12px;
   font-family: var(--font-display);
-  font-size: 36px;
-  color: #fff;
-  background: var(--bull);
-  box-shadow: 0 4px 0 #2f9a12;
+  font-size: 32px;
+  color: #7a5200;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+  background: radial-gradient(circle at 35% 30%, #fff3c4, #f5c542 45%, #c99212 85%, #a87a0c);
+  box-shadow: inset 0 0 0 2px rgba(122, 82, 0, 0.28), 0 4px 0 #a87a0c;
   animation: code-flip 0.5s cubic-bezier(0.3, 1.6, 0.5, 1) backwards;
 }
 
@@ -112,62 +109,107 @@
   from { transform: rotateX(90deg) scale(0.6); opacity: 0; }
 }
 
-.win-stats {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 16px;
-  align-items: center;
-  text-align: left;
-  padding: 14px 16px;
-  border-radius: 14px;
-  background: var(--surface);
+.win-meta {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.4;
 }
 
-.win-stats div {
+.win-rank {
+  margin: 10px 0 0;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  gap: 6px;
 }
 
-.win-stats b {
-  font-family: var(--font-display);
-  font-weight: normal;
-  font-size: 32px;
-  color: var(--text);
-}
-
-.win-stats .win-rank {
-  font-size: 20px;
-  color: var(--violet);
-}
-
-.win-stats small {
-  color: var(--text-dim);
-  font-size: 12px;
-}
-
-.win-stats .win-assist {
-  margin-top: 4px;
-  align-self: flex-start;
-  padding: 1px 8px;
+.win-rank-tag {
+  padding: 3px 10px;
   border-radius: 99px;
-  color: var(--violet);
-  background: var(--surface-2);
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: #fff;
 }
 
-.win-share {
-  margin: 18px 0 0;
-  font-family: inherit;
-  font-size: 20px;
+.win-rank-tag-gold {
+  background: var(--cow);
+}
+
+.win-rank-tag-violet {
+  background: var(--violet);
+}
+
+.win-rank-tag-hot {
+  background: var(--magenta);
+}
+
+.win-rank-tag-steel {
+  background: var(--steel-3);
+}
+
+.win-rank small {
+  color: var(--text-dim);
+  font-size: 13px;
   line-height: 1.35;
-  letter-spacing: 1px;
-  white-space: pre;
+}
+
+.win-heist {
+  margin: 16px auto 0;
+  width: min(100%, 360px);
+  padding: 14px 16px 16px;
+  border-radius: 16px;
+  background: var(--surface);
   text-align: center;
 }
 
+.win-heist-kicker {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+}
+
+.win-heist-copy {
+  margin: 8px 0 10px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text);
+}
+
+.win-heist-play {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  color: var(--text-dim);
+  background: #ffffff;
+  border: 1px solid var(--edge);
+  transition: transform 0.1s, color 0.15s, border-color 0.15s;
+}
+
+.win-heist-play:hover {
+  color: var(--text);
+}
+
+.win-heist-play:active {
+  transform: scale(0.97);
+}
+
+.win-heist-play[aria-pressed='true'] {
+  color: var(--magenta);
+  border-color: #ffd0e4;
+  background: #fff3f8;
+}
+
 .win-btn {
-  margin-top: 20px;
+  margin-top: 16px;
   width: 100%;
-  height: 58px;
+  height: 54px;
   border-radius: 16px;
   font-family: var(--font-display);
   font-size: 20px;
@@ -182,8 +224,23 @@
   filter: brightness(1.06);
 }
 
+.win-btn:disabled {
+  cursor: default;
+  filter: none;
+  opacity: 0.75;
+}
+
 .win-btn:active {
   transform: translateY(4px) scale(0.98);
+}
+
+.win-btn.win-share-btn {
+  display: block;
+  width: min(100%, 360px);
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 16px;
+  letter-spacing: 0.6px;
 }
 
 .win-lead {

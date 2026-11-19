@@ -1,4 +1,7 @@
-import type { AssistLevel, Code } from '../engine';
+import { useEffect, useRef, useState } from 'react';
+import { playCrackTune, stopCrackTune } from '../audio/crackTune';
+import { copyShareText, type SharePayload } from '../daily/shareOut';
+import type { AssistLevel, Code, Score } from '../engine';
 import { ASSIST_NAMES } from './AssistButton';
 import './WinModal.css';
 
@@ -12,21 +15,26 @@ interface Props {
   /** Daily result. Absent in Practice. */
   timeLabel?: string;
   againLabel?: string;
-  onShare?: () => void;
-  shared?: boolean;
-  /** Emoji rows for the daily share, one per guess. */
-  shareRows?: string[];
+  /** Daily crack log for the heist tune. Absent in Practice. */
+  tuneScores?: Score[];
+  sharePayload?: SharePayload;
   nextLabel?: string;
   onNext?: () => void;
   lead?: string;
   nextHint?: string;
 }
 
-function rank(guesses: number): { title: string; blurb: string } {
-  if (guesses <= 4) return { title: 'LEGENDARY', blurb: 'They will write songs about this heist.' };
-  if (guesses <= 6) return { title: 'MASTER THIEF', blurb: 'Smooth. Silent. Rich.' };
-  if (guesses <= 8) return { title: 'PRO CRACKER', blurb: 'The vault never stood a chance.' };
-  return { title: 'ROOKIE', blurb: 'Loud, messy, and loaded with loot.' };
+function heistGift(guesses: number) {
+  return guesses <= 4
+    ? 'A gift from us to you. We wrote a song about this one.'
+    : 'A gift from us to you. We turned your attempts into a song.';
+}
+
+function rank(guesses: number): { title: string; blurb: string; tag: string } {
+  if (guesses <= 4) return { title: 'LEGENDARY', blurb: 'They will write songs about this heist.', tag: 'gold' };
+  if (guesses <= 6) return { title: 'SMOOTH OPERATOR', blurb: 'In and out. Nobody heard a thing.', tag: 'violet' };
+  if (guesses <= 8) return { title: 'LOCKSMITH', blurb: 'A few wrong turns. Then the door gave up.', tag: 'hot' };
+  return { title: 'BRUTE FORCE', blurb: 'You took the scenic route.', tag: 'steel' };
 }
 
 export function WinModal({
@@ -37,24 +45,62 @@ export function WinModal({
   onClose,
   timeLabel,
   againLabel = 'CRACK ANOTHER VAULT',
-  onShare,
-  shared = false,
-  shareRows,
+  tuneScores,
+  sharePayload,
   nextLabel,
   onNext,
   lead,
   nextHint,
 }: Props) {
-  const { title, blurb } = rank(guesses);
+  const { title, blurb, tag } = rank(guesses);
   const assistSecond = Boolean(nextHint && onNext && nextLabel);
+  const [playing, setPlaying] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const playTimer = useRef<number>(0);
+  const copiedTimer = useRef<number>(0);
+  const showHeist = Boolean(tuneScores && tuneScores.length > 0);
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(playTimer.current);
+      window.clearTimeout(copiedTimer.current);
+      stopCrackTune();
+    };
+  }, []);
+
+  const handlePlayTune = () => {
+    if (!tuneScores || tuneScores.length === 0) return;
+    window.clearTimeout(playTimer.current);
+    if (playing) {
+      stopCrackTune();
+      setPlaying(false);
+      return;
+    }
+    const duration = playCrackTune(tuneScores);
+    if (duration <= 0) return;
+    setPlaying(true);
+    playTimer.current = window.setTimeout(() => setPlaying(false), duration * 1000);
+  };
+
+  const handleShare = async () => {
+    if (!sharePayload) return;
+    await copyShareText(sharePayload);
+    setCopied(true);
+    window.clearTimeout(copiedTimer.current);
+    copiedTimer.current = window.setTimeout(() => setCopied(false), 2000);
+  };
+
+  const meta = [guesses === 1 ? '1 attempt' : `${guesses} attempts`, timeLabel, ASSIST_NAMES[assist]]
+    .filter(Boolean)
+    .join(' · ');
+
   return (
-    <div className="win-overlay" role="dialog" aria-label="Vault cracked" onClick={onClose}>
+    <div className="win-overlay" role="dialog" aria-label="You cracked the vault" onClick={onClose}>
       <div className="win-card" onClick={(e) => e.stopPropagation()}>
         <button type="button" className="win-close" onClick={onClose} aria-label="Close and view the board">
           ✕
         </button>
-        <div className="win-kicker">ACCESS GRANTED</div>
-        <h2 className="win-title">VAULT CRACKED!</h2>
+        <h2 className="win-title">You cracked the vault!</h2>
         <div className="win-code">
           {secret.map((d, i) => (
             <span key={i} style={{ animationDelay: `${0.15 + i * 0.12}s` }}>
@@ -62,34 +108,36 @@ export function WinModal({
             </span>
           ))}
         </div>
-        {lead && <p className="win-lead">{lead}</p>}
-        <div className="win-stats">
-          <div>
-            <b>{guesses}</b>
-            <small>{guesses === 1 ? 'attempt' : 'attempts'}</small>
-            <small className="win-assist">{timeLabel ? `${timeLabel} · ${ASSIST_NAMES[assist]}` : ASSIST_NAMES[assist]}</small>
-          </div>
-          <div>
-            <b className="win-rank">{title}</b>
-            <small>{blurb}</small>
-          </div>
+        <p className="win-meta">{meta}</p>
+        <div className="win-rank">
+          <span className={`win-rank-tag win-rank-tag-${tag}`}>{title}</span>
+          <small>{blurb}</small>
         </div>
-        {shareRows && shareRows.length > 0 && <pre className="win-share">{shareRows.join('\n')}</pre>}
-        {onShare && (
-          <button type="button" className="win-btn" onClick={onShare} autoFocus>
-            {shared ? 'COPIED' : 'SHARE'}
+        {lead && <p className="win-lead">{lead}</p>}
+        {showHeist && (
+          <div className="win-heist">
+            <p className="win-heist-kicker">Hear the heist</p>
+            <p className="win-heist-copy">{heistGift(guesses)}</p>
+            <button type="button" className="win-heist-play" onClick={handlePlayTune} aria-pressed={playing}>
+              {playing ? 'Playing' : 'Play your break in'}
+            </button>
+          </div>
+        )}
+        {sharePayload && (
+          <button type="button" className="win-btn win-share-btn" onClick={() => void handleShare()} autoFocus>
+            {copied ? 'COPIED TO CLIPBOARD' : 'SHARE'}
           </button>
         )}
         {onNext && nextLabel && !assistSecond && (
-          <button type="button" className="win-btn" onClick={onNext} autoFocus={!onShare}>
+          <button type="button" className="win-btn" onClick={onNext} autoFocus={!sharePayload}>
             {nextLabel}
           </button>
         )}
         <button
           type="button"
-          className={onShare || (onNext && !assistSecond) ? 'win-review' : 'win-btn'}
+          className={sharePayload || (onNext && !assistSecond) ? 'win-review' : 'win-btn'}
           onClick={onPlayAgain}
-          autoFocus={!onShare && (!onNext || assistSecond)}
+          autoFocus={!sharePayload && (!onNext || assistSecond)}
         >
           {againLabel}
         </button>
