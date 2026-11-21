@@ -5,9 +5,7 @@ const STORAGE_KEY = 'vault-cracker:assist';
 const DEFAULT_LEVEL: AssistLevel = 'medium';
 
 function load(): AssistLevel {
-  if (typeof localStorage === 'undefined') return DEFAULT_LEVEL;
-  const saved = localStorage.getItem(STORAGE_KEY) as AssistLevel | null;
-  return saved && ASSIST_LEVELS.includes(saved) ? saved : DEFAULT_LEVEL;
+  return DEFAULT_LEVEL;
 }
 
 let level = load();

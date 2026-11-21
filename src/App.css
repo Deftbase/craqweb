@@ -20,6 +20,7 @@
   right: calc(var(--log-right) - 48px);
   z-index: 4;
   width: 348px;
+  min-width: 348px;
   height: auto;
   gap: 8px;
   padding: 14px 14px 12px;
@@ -131,12 +132,12 @@
 }
 
 .how-example {
-  display: grid;
-  grid-template-columns: auto auto auto;
-  justify-content: start;
+  display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   column-gap: 8px;
   width: max-content;
+  flex-shrink: 0;
   padding: 5px 8px;
   border-radius: 10px;
   background: #fff;
@@ -161,14 +162,21 @@
 }
 
 .how-example .ledger-score {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  flex-shrink: 0;
   gap: 2px;
   margin-left: 10px;
 }
 
 .how-example .badge {
   width: 86px;
+  flex-shrink: 0;
   padding: 2px 6px;
   font-size: 12px;
+  white-space: nowrap;
 }
 
 .how-to .panel-title {

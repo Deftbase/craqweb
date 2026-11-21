@@ -1,19 +1,21 @@
 .mobile-play {
   position: relative;
+  z-index: 5;
   min-height: 0;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  padding: 0 0 12px;
+  padding: 48px 0 12px;
 }
 
 .mobile-vault {
   position: relative;
   width: min(100%, 420px);
   aspect-ratio: 1;
-  overflow: hidden;
+  overflow: visible;
+  clip-path: inset(-72px -64px -64px 0);
   container-type: size;
 }
 
@@ -54,13 +56,14 @@
 
 .mobile-log .ledger-list {
   gap: 4px;
-  padding: 2px 0 0;
+  padding: 12px 0 0;
   max-height: min(38vh, 300px);
 }
 
 .mobile-log .ledger-row {
+  overflow: visible;
   gap: 6px;
-  padding: 4px 6px;
+  padding: 8px 6px 4px;
   border-radius: 8px;
 }
 
@@ -97,10 +100,11 @@
 }
 
 .mobile-log .ledger-tag {
-  top: -6px;
+  top: -8px;
   right: 8px;
-  padding: 0 5px;
-  font-size: 8px;
+  z-index: 1;
+  padding: 1px 7px;
+  font-size: 9px;
 }
 
 .mobile-log .ledger-empty {
@@ -126,28 +130,29 @@
 .mobile-play .how-to.mobile-how-to {
   --how-badge-w: 84px;
   position: absolute;
-  top: 8px;
+  top: 56px;
   left: 50%;
   right: auto;
   bottom: auto;
   z-index: 8;
-  width: min(100%, 420px);
+  width: 348px;
+  min-width: 348px;
   height: auto;
   max-height: none;
   overflow: visible;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  padding: 12px 14px 14px;
+  gap: 8px;
+  padding: 16px 16px 16px;
   pointer-events: auto;
   border-radius: 18px;
-  font-size: 12px;
-  line-height: 1.35;
+  font-size: 15px;
+  line-height: 1.4;
   color: var(--text-dim);
-  background: rgba(255, 255, 255, 0.42);
-  border: 1px solid rgba(255, 255, 255, 0.58);
-  box-shadow: 0 12px 32px rgba(28, 24, 48, 0.12);
-  backdrop-filter: blur(14px);
+  background: rgba(255, 255, 255, 0.26);
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  box-shadow: 0 12px 32px rgba(28, 24, 48, 0.1);
+  backdrop-filter: blur(16px);
   transform: translate(-50%, 0);
   animation: mobile-how-in 0.45s ease-out;
 }
@@ -172,17 +177,17 @@
 
 .mobile-play .how-to.mobile-how-to .panel-title {
   margin: 0 28px 0 0;
-  font-size: 13px;
+  font-size: 16px;
   letter-spacing: 1px;
 }
 
 .mobile-how-to p {
-  font-size: 12px;
+  font-size: 15px;
 }
 
 .mobile-how-to .how-keys {
-  font-size: 11px;
-  gap: 2px;
+  font-size: 13px;
+  gap: 4px;
 }
 
 .mobile-play .how-to.mobile-how-to .how-key {
@@ -195,24 +200,25 @@
 .mobile-play .how-to.mobile-how-to .how-example .badge {
   width: var(--how-badge-w);
   box-sizing: border-box;
-  padding: 2px 7px;
-  font-size: 9px;
+  padding: 3px 8px;
+  font-size: 11px;
   letter-spacing: 0;
   overflow: visible;
 }
 
 .mobile-play .how-to.mobile-how-to .how-example {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  justify-content: stretch;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: flex-start;
   column-gap: 6px;
-  padding: 4px 6px;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
+  padding: 6px 8px;
+  width: max-content;
+  max-width: none;
+  min-width: max-content;
   box-sizing: border-box;
   overflow: visible;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.88);
 }
 
 .mobile-play .how-to.mobile-how-to .how-example .ledger-idx {
@@ -225,22 +231,27 @@
 }
 
 .mobile-play .how-to.mobile-how-to .how-example .ledger-digits span {
-  width: clamp(16px, 5.2vw, 22px);
-  height: clamp(20px, 6.2vw, 26px);
+  width: 24px;
+  height: 28px;
   border-radius: 5px;
-  font-size: clamp(11px, 3.4vw, 14px);
+  font-size: 15px;
 }
 
 .mobile-play .how-to.mobile-how-to .how-example .ledger-score {
-  display: grid;
-  flex-direction: column;
-  align-items: stretch;
-  justify-items: stretch;
-  width: var(--how-badge-w);
-  max-width: 100%;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  flex-shrink: 0;
+  width: auto;
+  max-width: none;
   min-width: 0;
-  margin-left: 0;
-  gap: 2px;
+  margin-left: 2px;
+  gap: 4px;
+}
+
+.mobile-play .how-to.mobile-how-to .how-example .badge {
+  width: auto;
 }
 
 .mobile-how-to .how-tour {
@@ -249,14 +260,41 @@
 }
 
 .mobile-how-to .how-demo {
-  padding: 6px 12px;
-  font-size: 12px;
+  padding: 8px 16px;
+  font-size: 14px;
 }
 
 .mobile-how-to .how-try,
 .mobile-how-to .how-assist-link,
 .mobile-how-to .how-dot {
-  font-size: 11px;
+  font-size: 13px;
+}
+
+.mobile-rig .socket {
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
+}
+
+.mobile-rig .coin {
+  width: 54px;
+  height: 54px;
+  margin: -27px 0 0 -27px;
+}
+
+.mobile-rig .coin span {
+  font-size: 19px;
+}
+
+.mobile-rig .enter-label {
+  letter-spacing: 0;
+  transform: translateY(3px);
+}
+
+.mobile-rig .coin-finger,
+.mobile-rig .enter-finger {
+  z-index: 30;
+  width: 84px;
 }
 
 @media (prefers-reduced-motion: reduce) {

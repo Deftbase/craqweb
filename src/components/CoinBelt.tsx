@@ -164,7 +164,8 @@ export function CoinBelt({
   forceDead = [],
 }: Props) {
   const showMarks = assist !== 'solo';
-  const showBars = assist === 'medium' || assist === 'heavy';
+  const showBars =
+    (assist === 'medium' || assist === 'heavy') && spectrum.some((d) => d.state !== 'untested');
   const ready = canSubmit && !disabled;
   const [settledDead, setSettledDead] = useState<ReadonlySet<number>>(() => new Set());
   const deadKey = forceDead.join(',');

@@ -1,12 +1,15 @@
 /* Phone chrome only. Desktop .header stays in theme.css. */
 
 .header.header-phone {
+  position: relative;
+  z-index: 4;
   display: flex;
   flex-direction: column;
   align-items: stretch;
   justify-content: flex-start;
   gap: 8px;
   width: 100%;
+  overflow: visible;
   --chip-fs: clamp(9px, 2.6vw, 11px);
   --mode-fs: clamp(9px, 2.5vw, 11px);
 }
@@ -22,6 +25,7 @@
   gap: 6px;
   align-items: stretch;
   width: 100%;
+  overflow: visible;
 }
 
 .header-phone-row-modes {
@@ -65,6 +69,7 @@
 }
 
 .header-phone .assist-btn {
+  overflow: visible;
   gap: 4px;
 }
 
@@ -79,9 +84,20 @@
 }
 
 .header-phone .assist-tip {
-  display: none;
+  display: block;
+  top: auto;
+  bottom: calc(100% + 8px);
+  z-index: 40;
 }
 
-.header-phone .assist-btn.cue .assist-tip {
-  display: block;
+.header-phone .assist-tip::before {
+  top: 100%;
+  bottom: auto;
+  border-bottom-color: transparent;
+  border-top-color: var(--text);
+}
+
+.header-phone .assist-finger {
+  z-index: 20;
+  width: 56px;
 }

@@ -250,6 +250,13 @@ button:focus-visible,
 }
 
 @media (max-width: 560px) {
+  html,
+  body,
+  #root,
+  .app {
+    min-width: 380px;
+  }
+
   body {
     overflow: auto;
   }

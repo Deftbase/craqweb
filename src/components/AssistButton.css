@@ -62,7 +62,8 @@
 }
 
 .assist-btn:hover .assist-tip,
-.assist-btn.cue .assist-tip {
+.assist-btn.cue .assist-tip,
+.assist-btn.is-tipped .assist-tip {
   opacity: 1;
   transform: translate(-50%, 0);
 }
