@@ -2,7 +2,7 @@
 
 .header.header-phone {
   position: relative;
-  z-index: 4;
+  z-index: 6;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -85,16 +85,7 @@
 
 .header-phone .assist-tip {
   display: block;
-  top: auto;
-  bottom: calc(100% + 8px);
   z-index: 40;
-}
-
-.header-phone .assist-tip::before {
-  top: 100%;
-  bottom: auto;
-  border-bottom-color: transparent;
-  border-top-color: var(--text);
 }
 
 .header-phone .assist-finger {

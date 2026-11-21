@@ -100,16 +100,6 @@ export function MobilePlay({
             ['--cy' as string]: `${CY}px`,
           }}
         >
-          {walk && !tourPlaying && !helpOpen && playing && (
-            <TourPopup
-              key={`${tour}-${state.history.length}-${assist}`}
-              slides={walk.slides}
-              index={tourSlide}
-              onNext={onTourNext}
-              onBack={onTourBack}
-              onSkip={onTourSkip}
-            />
-          )}
           <VaultDoor
             ref={vaultRef}
             slots={state.slots}
@@ -142,6 +132,16 @@ export function MobilePlay({
           />
         </div>
       </div>
+      {walk && !tourPlaying && !helpOpen && playing && (
+        <TourPopup
+          key={`${tour}-${state.history.length}-${assist}`}
+          slides={walk.slides}
+          index={tourSlide}
+          onNext={onTourNext}
+          onBack={onTourBack}
+          onSkip={onTourSkip}
+        />
+      )}
       {helpOpen && (
         <aside className="how-to mobile-how-to" aria-label="How to play">
           <button type="button" className="mobile-how-to-close" onClick={onCloseHelp} aria-label="Close">

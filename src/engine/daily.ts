@@ -1,9 +1,12 @@
 import { allCodes } from './code';
 import type { Code } from './types';
 
-/** UTC day, so everyone cracking "today" shares one code. */
+/** Local calendar day. Reset is midnight on this device, like Wordle. */
 export function dayKey(now = new Date()): string {
-  return now.toISOString().slice(0, 10);
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
 }
 
 function hashDay(day: string): number {

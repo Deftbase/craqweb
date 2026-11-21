@@ -297,9 +297,70 @@
   width: 84px;
 }
 
+.mobile-play .tour-pop {
+  left: 50%;
+  top: 42%;
+  z-index: 9;
+  width: min(92%, 400px);
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 16px 36px rgba(28, 24, 48, 0.1);
+  backdrop-filter: blur(18px);
+  transform: translate(-50%, -50%);
+  animation: mobile-tour-pop-in 0.35s cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+
+@keyframes mobile-tour-pop-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -42%) scale(0.92);
+  }
+}
+
+.mobile-play .tour-pop-body {
+  gap: 14px;
+  padding: 18px 18px 14px;
+}
+
+.mobile-play .tour-kicker {
+  font-size: 14px;
+}
+
+.mobile-play .tour-hello {
+  font-size: 28px;
+}
+
+.mobile-play .tour-copy {
+  font-size: 18px;
+}
+
+.mobile-play .tour-caption {
+  font-size: 17px;
+}
+
+.mobile-play .tour-chip {
+  width: 46px;
+  height: 46px;
+  font-size: 20px;
+}
+
+.mobile-play .tour-next {
+  padding: 11px 18px;
+  font-size: 15px;
+}
+
+.mobile-play .tour-skip {
+  font-size: 14px;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .mobile-play .how-to.mobile-how-to {
     animation: none;
     transform: translate(-50%, 0);
+  }
+
+  .mobile-play .tour-pop {
+    animation: none;
+    transform: translate(-50%, -50%);
   }
 }

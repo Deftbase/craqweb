@@ -15,7 +15,7 @@ const won = (day: string, current: number, max = current): StreakSave => ({
 });
 
 describe('daily streak', () => {
-  it('treats UTC yesterday as the previous day key', () => {
+  it('treats the previous local calendar day as yesterday', () => {
     expect(yesterdayKey('2026-11-19')).toBe('2026-11-18');
     expect(yesterdayKey('2026-03-01')).toBe('2026-02-28');
   });

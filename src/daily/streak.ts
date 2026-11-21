@@ -1,3 +1,5 @@
+import { dayKey } from '../engine/daily';
+
 const KEY = 'vault-cracker:streak';
 
 export interface StreakSave {
@@ -11,7 +13,8 @@ export function emptyStreak(): StreakSave {
 }
 
 export function yesterdayKey(day: string): string {
-  return new Date(Date.parse(`${day}T00:00:00Z`) - 86_400_000).toISOString().slice(0, 10);
+  const [y, m, d] = day.split('-').map(Number);
+  return dayKey(new Date(y, m - 1, d - 1));
 }
 
 export function loadStreak(): StreakSave {

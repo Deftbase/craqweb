@@ -5,6 +5,7 @@ import {
   computeSpectrum,
   createGame,
   dailyCode,
+  dayKey,
   filterCandidates,
   gameReducer,
   isValidCode,
@@ -36,6 +37,11 @@ describe('codes', () => {
     expect(dailyCode('2026-11-11')).toEqual(first);
     expect(isValidCode([...first])).toBe(true);
     expect(dailyCode('2026-11-12')).not.toEqual(first);
+  });
+
+  it('keys the daily off the local calendar date', () => {
+    expect(dayKey(new Date(2026, 10, 21, 0, 15, 0))).toBe('2026-11-21');
+    expect(dayKey(new Date(2026, 10, 21, 23, 45, 0))).toBe('2026-11-21');
   });
 
   it('replays a solved daily back to won', () => {
