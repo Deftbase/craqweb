@@ -1,7 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import {
+  challengeText,
   clockFromDaily,
   dailyCrackedToday,
+  dailyFromSearch,
+  dailyPlayUrl,
   dailyShare,
   decodeHeist,
   elapsedMs,
@@ -68,6 +71,18 @@ describe('daily share', () => {
       { bulls: 4, cows: 0 },
     ]);
     expect(heistListenUrl([{ bulls: 4, cows: 0 }], 'https://craq.example/')).toBe('https://craq.example/#heist=40');
+  });
+
+  it('builds a Daily challenge note with a play link', () => {
+    expect(dailyFromSearch('?daily')).toBe(true);
+    expect(dailyFromSearch('')).toBe(false);
+    expect(dailyPlayUrl('https://craq.example/')).toBe('https://craq.example/?daily');
+    expect(challengeText(1, 'https://craq.example/?daily')).toBe(
+      'I cracked the code in 1 guess, can you beat that?\nhttps://craq.example/?daily',
+    );
+    expect(challengeText(6, 'https://craq.example/?daily')).toBe(
+      'I cracked the code in 6 guesses, can you beat that?\nhttps://craq.example/?daily',
+    );
   });
 
   it('knows this browser cracked today from the daily save', () => {

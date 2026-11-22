@@ -14,6 +14,7 @@ import {
 } from './engine';
 import {
   clockFromDaily,
+  dailyFromSearch,
   formatClock,
   gameForMode,
   dailyCrackedToday,
@@ -77,7 +78,13 @@ const strongerAssist = (a: AssistLevel, b: AssistLevel) =>
 
 export default function App() {
   const assist = useAssist();
-  const [mode, setMode] = useState<GameMode>(loadMode);
+  const [mode, setMode] = useState<GameMode>(() => {
+    if (dailyFromSearch()) {
+      saveMode('daily');
+      return 'daily';
+    }
+    return loadMode();
+  });
   const [demoAvailable, setDemoAvailable] = useState(() => !loadTour().unlockDone);
   const [tour, setTour] = useState<TourKind | null>(null);
   const [boot] = useState(() => gameForMode(mode));
@@ -943,13 +950,11 @@ export default function App() {
           timeLabel={mode === 'daily' ? formatClock(shownMs) : undefined}
           streakLabel={mode === 'daily' ? streakLine(streak) : undefined}
           againLabel={
-            mode === 'daily'
-              ? 'PLAY PRACTICE'
-              : tour === 'unlock'
-                ? 'PLAY ANOTHER GAME'
-                : tour
-                  ? 'PRACTICE FREELY'
-                  : 'CRACK ANOTHER VAULT'
+            tour === 'unlock'
+              ? 'PLAY ANOTHER GAME'
+              : tour
+                ? 'PRACTICE FREELY'
+                : 'CRACK ANOTHER VAULT'
           }
           lead={tour === 'unlock' ? "Congrats!! You've just unlocked your first vault." : undefined}
           nextHint={tour === 'unlock' ? 'See how hints work:' : undefined}
@@ -967,9 +972,7 @@ export default function App() {
                 }
               : undefined
           }
-          onPlayAgain={
-            mode === 'daily' ? () => switchMode('versus') : tour ? () => endTour(true, tour === 'unlock') : handleNewGame
-          }
+          onPlayAgain={tour ? () => endTour(true, tour === 'unlock') : handleNewGame}
           onClose={() => {
             setResultsOpen(false);
             refocus();

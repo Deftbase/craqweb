@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { playCrackTune, stopCrackTune } from '../audio/crackTune';
+import { challengeText, dailyPlayUrl } from '../daily/save';
 import { copyShareText, type SharePayload } from '../daily/shareOut';
 import type { AssistLevel, Code, Score } from '../engine';
 import { ASSIST_NAMES } from './AssistButton';
@@ -93,6 +94,19 @@ export function WinModal({
     copiedTimer.current = window.setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleChallenge = async () => {
+    const text = challengeText(guesses, dailyPlayUrl());
+    try {
+      if (typeof navigator.share === 'function') {
+        await navigator.share({ text });
+        return;
+      }
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return;
+    }
+    await navigator.clipboard.writeText(text);
+  };
+
   const meta = [guesses === 1 ? '1 attempt' : `${guesses} attempts`, timeLabel, ASSIST_NAMES[assist]]
     .filter(Boolean)
     .join(' · ');
@@ -137,14 +151,20 @@ export function WinModal({
             {nextLabel}
           </button>
         )}
-        <button
-          type="button"
-          className={sharePayload || (onNext && !assistSecond) ? 'win-review' : 'win-btn'}
-          onClick={onPlayAgain}
-          autoFocus={!sharePayload && (!onNext || assistSecond)}
-        >
-          {againLabel}
-        </button>
+        {sharePayload ? (
+          <button type="button" className="win-challenge" onClick={() => void handleChallenge()}>
+            Challenge a friend
+          </button>
+        ) : (
+          <button
+            type="button"
+            className={onNext && !assistSecond ? 'win-review' : 'win-btn'}
+            onClick={onPlayAgain}
+            autoFocus={!onNext || assistSecond}
+          >
+            {againLabel}
+          </button>
+        )}
         {assistSecond && (
           <div className="win-hint-row">
             <span className="win-hint">{nextHint}</span>
@@ -153,9 +173,6 @@ export function WinModal({
             </button>
           </div>
         )}
-        <button type="button" className="win-review" onClick={onClose}>
-          Review the board
-        </button>
       </div>
     </div>
   );

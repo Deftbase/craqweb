@@ -127,6 +127,23 @@ export function heistListenUrl(history: readonly { bulls: number; cows: number }
   return `${base}#heist=${encodeHeist(history)}`;
 }
 
+export function dailyFromSearch(search = typeof window === 'undefined' ? '' : window.location.search): boolean {
+  return new URLSearchParams(search).has('daily');
+}
+
+/** Landing link for a friend to play today's vault. Digits stay off. */
+export function dailyPlayUrl(origin?: string) {
+  const base =
+    origin ??
+    (typeof window === 'undefined' ? '' : `${window.location.origin}${window.location.pathname}`);
+  return `${base.replace(/\/$/, '')}/?daily`;
+}
+
+export function challengeText(guesses: number, url: string): string {
+  const tries = guesses === 1 ? '1 guess' : `${guesses} guesses`;
+  return `I cracked the code in ${tries}, can you beat that?\n${url}`;
+}
+
 /** Clipboard text for a finished daily. Digits stay off the share. */
 export function dailyShare(
   history: readonly { bulls: number; cows: number }[],

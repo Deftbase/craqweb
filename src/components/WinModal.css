@@ -58,6 +58,23 @@
   color: var(--text);
 }
 
+.win-challenge {
+  margin-top: 12px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--focus);
+  font-size: 14px;
+  letter-spacing: 0.2px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.win-challenge:hover {
+  color: var(--magenta);
+}
+
 .win-card {
   position: relative;
   width: min(460px, 100%);
