@@ -118,7 +118,7 @@ const [lx1, ly1] = labelAt(196);
 const [lx2, ly2] = labelAt(164);
 const labelPath = `M ${lx1} ${ly1} A ${LABEL_R} ${LABEL_R} 0 0 0 ${lx2} ${ly2}`;
 
-function tipFor(signal: DigitSignal, showBars: boolean): string {
+function tipFor(signal: DigitSignal, showBars: boolean): string | null {
   switch (signal.state) {
     case 'untested':
       return showBars ? `${Math.round(signal.value * 100)}% likely` : 'Not tried yet';
@@ -127,7 +127,7 @@ function tipFor(signal: DigitSignal, showBars: boolean): string {
     case 'locked':
       return '100% · in the code';
     case 'active':
-      return `${Math.round(signal.value * 100)}% likely`;
+      return showBars ? `${Math.round(signal.value * 100)}% likely` : null;
   }
 }
 
@@ -164,8 +164,8 @@ export function CoinBelt({
   forceDead = [],
 }: Props) {
   const showMarks = assist !== 'solo';
-  const showBars =
-    (assist === 'medium' || assist === 'heavy') && spectrum.some((d) => d.state !== 'untested');
+  const hasGuess = spectrum.some((d) => d.state !== 'untested');
+  const showBars = (assist === 'medium' || assist === 'heavy') && hasGuess;
   const ready = canSubmit && !disabled;
   const [settledDead, setSettledDead] = useState<ReadonlySet<number>>(() => new Set());
   const deadKey = forceDead.join(',');
@@ -304,8 +304,24 @@ export function CoinBelt({
         const used = slots.includes(digit);
         const next = nextHint === digit;
         const knockedOut = forceDead.includes(digit);
+        const fresh = hasGuess && signal.state === 'untested' && !knockedOut;
+        const markClass = knockedOut
+          ? null
+          : fresh
+            ? 'untested'
+            : showMarks && (signal.state === 'dead' || signal.state === 'locked')
+              ? signal.state
+              : hasGuess && signal.state === 'active'
+                ? 'active'
+                : null;
         const tourTip = (next && hintTips[digit]) || digitTips[digit];
-        const hoverTip = knockedOut ? null : showMarks ? tipFor(signal, showBars) : null;
+        const hoverTip = knockedOut
+          ? null
+          : fresh
+            ? tipFor(signal, showBars)
+            : showMarks && signal.state !== 'untested'
+              ? tipFor(signal, showBars)
+              : null;
         const tip = tourTip ?? hoverTip;
         return (
           <span key={digit}>
@@ -313,7 +329,7 @@ export function CoinBelt({
             <button
               type="button"
               tabIndex={-1}
-              className={['coin', used && 'used', (knockedOut || (showMarks && signal.state === 'dead')) && 'dead', settledDead.has(digit) && 'settled', showMarks && !knockedOut && signal.state, next && 'next', disabled && 'is-off', x > CX && 'tip-left', tourTip && 'has-tour-tip']
+              className={['coin', used && 'used', (knockedOut || (showMarks && signal.state === 'dead')) && 'dead', settledDead.has(digit) && 'settled', markClass, next && 'next', disabled && 'is-off', x > CX && 'tip-left', tourTip && 'has-tour-tip']
                 .filter(Boolean)
                 .join(' ')}
               style={{

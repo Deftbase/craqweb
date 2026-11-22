@@ -199,7 +199,36 @@
   line-height: 1.3;
 }
 
-.coin.untested { --track: transparent; }
+.coin.untested {
+  --track: transparent;
+}
+
+/* Fresh = unused chrome. Tried = flatter, dulled silver. */
+.coin.untested span {
+  background: radial-gradient(circle at 30% 26%, #ffffff 0%, #f7f8fb 38%, #d5dae4 78%, #b4bac8);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.08),
+    0 5px 8px rgba(0, 0, 0, 0.2);
+}
+
+.coin.untested span b {
+  color: #3a3f4d;
+}
+
+.coin.active span {
+  background: radial-gradient(circle at 38% 32%, #e4e6ec, #b8bcc6 50%, #8e93a0 90%, #7a7f8c);
+  box-shadow:
+    inset 0 0 0 2px rgba(0, 0, 0, 0.16),
+    inset 0 -2px 3px rgba(0, 0, 0, 0.18),
+    0 1px 3px rgba(0, 0, 0, 0.18);
+}
+
+.coin.active span b {
+  color: color-mix(in srgb, #7a5200 calc(var(--g) * 100%), #5c6170);
+  text-shadow: none;
+}
 
 .coin.locked {
   z-index: 2;
