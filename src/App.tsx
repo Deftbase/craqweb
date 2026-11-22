@@ -972,16 +972,8 @@ export default function App() {
                   listenUrl: mode === 'daily' ? heistListenUrl(state.history) : undefined,
                 }
           }
-          onPlayAgain={
-            tour
-              ? () => endTour(true, tour === 'unlock')
-              : mode === 'daily'
-                ? () => {
-                    versusRef.current = null;
-                    switchMode('versus');
-                  }
-                : handleNewGame
-          }
+          nextVault={mode === 'daily' && !tour}
+          onPlayAgain={tour ? () => endTour(true, tour === 'unlock') : handleNewGame}
           onClose={() => {
             setResultsOpen(false);
             refocus();

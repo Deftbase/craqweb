@@ -168,6 +168,19 @@ export function formatClock(ms: number): string {
   return `${m}:${s}`;
 }
 
+/** Milliseconds until local midnight, when Daily refreshes. */
+export function msUntilTomorrow(now = new Date()): number {
+  const next = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  return Math.max(0, next.getTime() - now.getTime());
+}
+
+export function nextVaultLine(ms = msUntilTomorrow()): string {
+  const totalMins = Math.max(0, Math.floor(ms / 60_000));
+  const hrs = Math.floor(totalMins / 60);
+  const mins = String(totalMins % 60).padStart(2, '0');
+  return `new vault in ${hrs}hrs: ${mins} mins`;
+}
+
 export function gameForMode(mode: GameMode, versus?: GameState): GameState {
   if (mode === 'versus') return versus ?? createGame(randomCode());
   const day = dayKey();

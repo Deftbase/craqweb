@@ -11,6 +11,8 @@ import {
   encodeHeist,
   formatClock,
   heistFromHash,
+  msUntilTomorrow,
+  nextVaultLine,
   heistListenUrl,
   idleClock,
   shareMarks,
@@ -131,6 +133,14 @@ describe('daily clock', () => {
     expect(formatClock(41_000)).toBe('00:41');
     expect(formatClock(126_000)).toBe('02:06');
     expect(formatClock(3_661_000)).toBe('1:01:01');
+  });
+
+  it('counts down to the next local Daily', () => {
+    const now = new Date(2026, 10, 22, 16, 28, 40);
+    expect(msUntilTomorrow(now)).toBe(7 * 3600_000 + 31 * 60_000 + 20_000);
+    expect(nextVaultLine(7 * 3600_000 + 32 * 60_000)).toBe('new vault in 7hrs: 32 mins');
+    expect(nextVaultLine(5 * 60_000)).toBe('new vault in 0hrs: 05 mins');
+    expect(nextVaultLine(0)).toBe('new vault in 0hrs: 00 mins');
   });
 
   it('stays idle until a guess exists', () => {

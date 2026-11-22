@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { playCrackTune, stopCrackTune } from '../audio/crackTune';
-import { challengeText, dailyPlayUrl } from '../daily/save';
+import { challengeText, dailyPlayUrl, nextVaultLine } from '../daily/save';
 import { shareCaption, shareOrCopy, type SharePayload } from '../daily/shareOut';
 import type { AssistLevel, Code, Score } from '../engine';
 import { ASSIST_NAMES } from './AssistButton';
@@ -25,6 +25,8 @@ interface Props {
   nextHint?: string;
   /** Daily streak on this browser. Absent in Practice. */
   streakLabel?: string;
+  /** Daily win card shows a countdown instead of new vault. */
+  nextVault?: boolean;
 }
 
 function heistGift(guesses: number) {
@@ -55,6 +57,7 @@ export function WinModal({
   lead,
   nextHint,
   streakLabel,
+  nextVault = false,
 }: Props) {
   const { title, blurb, tag } = rank(guesses);
   const assistSecond = Boolean(nextHint && onNext && nextLabel);
@@ -65,6 +68,7 @@ export function WinModal({
   const copiedTimer = useRef<number>(0);
   const challengedTimer = useRef<number>(0);
   const showHeist = Boolean(tuneScores && tuneScores.length > 0);
+  const [vaultIn, setVaultIn] = useState(nextVaultLine);
 
   useEffect(() => {
     return () => {
@@ -74,6 +78,14 @@ export function WinModal({
       stopCrackTune();
     };
   }, []);
+
+  useEffect(() => {
+    if (!nextVault) return;
+    const tick = () => setVaultIn(nextVaultLine());
+    tick();
+    const id = window.setInterval(tick, 1000);
+    return () => window.clearInterval(id);
+  }, [nextVault]);
 
   const handlePlayTune = () => {
     if (!tuneScores || tuneScores.length === 0) return;
@@ -151,24 +163,31 @@ export function WinModal({
           </button>
         )}
         {sharePayload ? (
-          <p className="how-links win-links">
-            <span className="win-challenge-wrap">
-              <button type="button" className="how-try" onClick={() => void handleChallenge()}>
-                challenge a friend
-              </button>
-              {challenged && (
-                <span className="win-copied-tip" role="status">
-                  Copied to clipboard
-                </span>
+          <div className="win-foot">
+            <p className="how-links win-links">
+              <span className="win-challenge-wrap">
+                <button type="button" className="how-try" onClick={() => void handleChallenge()}>
+                  challenge a friend
+                </button>
+                {challenged && (
+                  <span className="win-copied-tip" role="status">
+                    Copied to clipboard
+                  </span>
+                )}
+              </span>
+              {!nextVault && (
+                <>
+                  <span className="how-dot" aria-hidden>
+                    ·
+                  </span>
+                  <button type="button" className="how-try" onClick={onPlayAgain}>
+                    new vault
+                  </button>
+                </>
               )}
-            </span>
-            <span className="how-dot" aria-hidden>
-              ·
-            </span>
-            <button type="button" className="how-try" onClick={onPlayAgain}>
-              new vault
-            </button>
-          </p>
+            </p>
+            {nextVault && <p className="win-next-vault">{vaultIn}</p>}
+          </div>
         ) : (
           <button
             type="button"
