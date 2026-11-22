@@ -9,10 +9,10 @@ const MAGENTA = '#ff3d8b';
 
 export interface SharePayload {
   history: readonly { bulls: number; cows: number }[];
-  day: string;
-  clockLabel: string;
+  day?: string;
+  clockLabel?: string;
   assistName: string;
-  listenUrl: string;
+  listenUrl?: string;
 }
 
 export function shareCaption(payload: SharePayload) {
@@ -25,6 +25,26 @@ export function twitterShareUrl(text: string) {
 
 export function messagesShareUrl(text: string) {
   return `sms:?body=${encodeURIComponent(text)}`;
+}
+
+/** Phone share sheet. Skip desktop Chrome’s share UI so clipboard copy can show. */
+export function prefersNativeShare() {
+  if (typeof navigator === 'undefined' || typeof navigator.share !== 'function') return false;
+  if (typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches) return true;
+  return /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+}
+
+export async function shareOrCopy(text: string): Promise<'shared' | 'copied' | 'idle'> {
+  if (prefersNativeShare()) {
+    try {
+      await navigator.share({ text });
+      return 'shared';
+    } catch (err) {
+      if (isAbort(err)) return 'idle';
+    }
+  }
+  await navigator.clipboard.writeText(text);
+  return 'copied';
 }
 
 /** iPhone/Android get the OS sheet. Desktop browsers often have no share API at all. */
@@ -76,7 +96,7 @@ function isAbort(err: unknown) {
 async function shareGridFile(payload: SharePayload): Promise<File | null> {
   const blob = await renderShareGridPng(payload);
   if (!blob) return null;
-  return new File([blob], `craq-${payload.day}.png`, { type: 'image/png' });
+  return new File([blob], `craq-${payload.day ?? 'practice'}.png`, { type: 'image/png' });
 }
 
 async function renderShareGridPng(payload: SharePayload): Promise<Blob | null> {
@@ -114,7 +134,7 @@ async function renderShareGridPng(payload: SharePayload): Promise<Blob | null> {
 
   ctx.fillStyle = DIM;
   ctx.font = '14px "Russo One", sans-serif';
-  ctx.fillText(`Daily ${payload.day}`, pad, pad + 50);
+  ctx.fillText(payload.day ? `Daily ${payload.day}` : 'Practice', pad, pad + 50);
 
   const gx = pad;
   const gy = pad + 78;

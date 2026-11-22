@@ -962,17 +962,26 @@ export default function App() {
           onNext={tour === 'unlock' ? () => beginTour('assist') : undefined}
           tuneScores={mode === 'daily' ? state.history : undefined}
           sharePayload={
-            mode === 'daily'
-              ? {
+            tour
+              ? undefined
+              : {
                   history: state.history,
-                  day: dayKey(),
-                  clockLabel: formatClock(shownMs),
+                  day: mode === 'daily' ? dayKey() : undefined,
+                  clockLabel: mode === 'daily' ? formatClock(shownMs) : undefined,
                   assistName: ASSIST_NAMES[peakAssist],
-                  listenUrl: heistListenUrl(state.history),
+                  listenUrl: mode === 'daily' ? heistListenUrl(state.history) : undefined,
                 }
-              : undefined
           }
-          onPlayAgain={tour ? () => endTour(true, tour === 'unlock') : handleNewGame}
+          onPlayAgain={
+            tour
+              ? () => endTour(true, tour === 'unlock')
+              : mode === 'daily'
+                ? () => {
+                    versusRef.current = null;
+                    switchMode('versus');
+                  }
+                : handleNewGame
+          }
           onClose={() => {
             setResultsOpen(false);
             refocus();

@@ -144,16 +144,16 @@ export function challengeText(guesses: number, url: string): string {
   return `I cracked the code in ${tries}, can you beat that?\n${url}`;
 }
 
-/** Clipboard text for a finished daily. Digits stay off the share. */
+/** Clipboard / share text for a finished vault. Digits stay off the share. */
 export function dailyShare(
   history: readonly { bulls: number; cows: number }[],
-  clockLabel: string,
+  clockLabel: string | undefined,
   assistName: string,
   listenUrl?: string,
 ): string {
   const tries = history.length === 1 ? '1 try' : `${history.length} tries`;
   const rows = history.map((guess) => shareRow(guess.bulls, guess.cows)).join('\n');
-  const header = `CRAQ ${tries} · ${clockLabel} · ${assistName}`;
+  const header = [`CRAQ ${tries}`, clockLabel, assistName].filter(Boolean).join(' · ');
   if (!listenUrl) return `${header}\n\n${rows}`;
   return `${header}\n\n${rows}\n\nPlay your break in\n${listenUrl}`;
 }

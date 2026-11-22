@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { playCrackTune, stopCrackTune } from '../audio/crackTune';
 import { challengeText, dailyPlayUrl } from '../daily/save';
-import { copyShareText, type SharePayload } from '../daily/shareOut';
+import { shareCaption, shareOrCopy, type SharePayload } from '../daily/shareOut';
 import type { AssistLevel, Code, Score } from '../engine';
 import { ASSIST_NAMES } from './AssistButton';
 import './WinModal.css';
@@ -60,14 +60,17 @@ export function WinModal({
   const assistSecond = Boolean(nextHint && onNext && nextLabel);
   const [playing, setPlaying] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [challenged, setChallenged] = useState(false);
   const playTimer = useRef<number>(0);
   const copiedTimer = useRef<number>(0);
+  const challengedTimer = useRef<number>(0);
   const showHeist = Boolean(tuneScores && tuneScores.length > 0);
 
   useEffect(() => {
     return () => {
       window.clearTimeout(playTimer.current);
       window.clearTimeout(copiedTimer.current);
+      window.clearTimeout(challengedTimer.current);
       stopCrackTune();
     };
   }, []);
@@ -88,23 +91,19 @@ export function WinModal({
 
   const handleShare = async () => {
     if (!sharePayload) return;
-    await copyShareText(sharePayload);
+    const result = await shareOrCopy(shareCaption(sharePayload));
+    if (result !== 'copied') return;
     setCopied(true);
     window.clearTimeout(copiedTimer.current);
     copiedTimer.current = window.setTimeout(() => setCopied(false), 2000);
   };
 
   const handleChallenge = async () => {
-    const text = challengeText(guesses, dailyPlayUrl());
-    try {
-      if (typeof navigator.share === 'function') {
-        await navigator.share({ text });
-        return;
-      }
-    } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') return;
-    }
-    await navigator.clipboard.writeText(text);
+    const result = await shareOrCopy(challengeText(guesses, dailyPlayUrl()));
+    if (result !== 'copied') return;
+    setChallenged(true);
+    window.clearTimeout(challengedTimer.current);
+    challengedTimer.current = window.setTimeout(() => setChallenged(false), 2000);
   };
 
   const meta = [guesses === 1 ? '1 attempt' : `${guesses} attempts`, timeLabel, ASSIST_NAMES[assist]]
@@ -152,9 +151,24 @@ export function WinModal({
           </button>
         )}
         {sharePayload ? (
-          <button type="button" className="win-challenge" onClick={() => void handleChallenge()}>
-            Challenge a friend
-          </button>
+          <p className="how-links win-links">
+            <span className="win-challenge-wrap">
+              <button type="button" className="how-try" onClick={() => void handleChallenge()}>
+                challenge a friend
+              </button>
+              {challenged && (
+                <span className="win-copied-tip" role="status">
+                  Copied to clipboard
+                </span>
+              )}
+            </span>
+            <span className="how-dot" aria-hidden>
+              ·
+            </span>
+            <button type="button" className="how-try" onClick={onPlayAgain}>
+              new vault
+            </button>
+          </p>
         ) : (
           <button
             type="button"

@@ -60,6 +60,19 @@ describe('daily share', () => {
     expect(text).not.toContain('tries');
   });
 
+  it('writes a Practice share without a clock or heist link', () => {
+    const text = dailyShare(
+      [
+        { bulls: 1, cows: 0 },
+        { bulls: 4, cows: 0 },
+      ],
+      undefined,
+      'Medium',
+    );
+    expect(text).toBe('CRAQ 2 tries · Medium\n\n🟢\n🟢🟢🟢🟢');
+    expect(text).not.toContain('Play your break in');
+  });
+
   it('encodes the crack log for a listen link', () => {
     expect(encodeHeist([{ bulls: 0, cows: 0 }, { bulls: 4, cows: 0 }])).toBe('00-40');
     expect(decodeHeist('00-40')).toEqual([
