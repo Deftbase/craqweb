@@ -35,7 +35,7 @@
 .enter-label {
   font-family: var(--font-display);
   font-size: 22px;
-  letter-spacing: 4px;
+  letter-spacing: 1px;
   fill: #a4a8b4;
   filter: drop-shadow(0 1px 0 #fff);
   pointer-events: none;
@@ -61,9 +61,9 @@
 
 .socket {
   position: absolute;
-  width: 35px;
-  height: 35px;
-  margin: -17.5px 0 0 -17.5px;
+  width: 44px;
+  height: 44px;
+  margin: -22px 0 0 -22px;
   border-radius: 50%;
   background: radial-gradient(circle at 50% 35%, #b4b8c4, #d9dce3 70%);
   box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.3), 0 1px 0 #fff;
@@ -77,9 +77,9 @@
   --track: rgba(28, 24, 48, 0.12);
   position: absolute;
   z-index: 1;
-  width: 42px;
-  height: 42px;
-  margin: -21px 0 0 -21px;
+  width: 54px;
+  height: 54px;
+  margin: -27px 0 0 -27px;
   padding: 4px;
   border-radius: 50%;
   background: conic-gradient(var(--c) calc(var(--v) * 360deg), var(--track) 0);
@@ -97,7 +97,7 @@
   border-radius: 50%;
   overflow: hidden;
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: 19px;
   color: #4d5262;
   text-shadow: 0 1px 0 rgba(255, 255, 255, 0.7);
   background: radial-gradient(circle at 35% 30%, #ffffff, #d6d9e0 45%, #a9aebb 85%, #8e93a3);
