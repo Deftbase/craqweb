@@ -138,11 +138,15 @@ function warmth(signal: DigitSignal, showMarks: boolean, showBars: boolean): num
   return Math.min(1, Math.max(0, (signal.value - 0.07) / 0.8));
 }
 
-function ring(signal: DigitSignal, showBars: boolean): number {
-  if (!showBars) return 0;
-  if (signal.state === 'locked') return 1;
-  if (signal.state === 'dead') return 0;
-  if (signal.state === 'active' || signal.state === 'untested') return signal.value;
+function ring(signal: DigitSignal, showBars: boolean, triedGrey: boolean): number {
+  if (showBars) {
+    if (signal.state === 'locked') return 1;
+    if (signal.state === 'dead') return 0;
+    if (signal.state === 'active' || signal.state === 'untested') return signal.value;
+    return 0;
+  }
+  /* Solo / Light: full grey rim after a digit has been tried. */
+  if (triedGrey && signal.state === 'active') return 1;
   return 0;
 }
 
@@ -304,7 +308,7 @@ export function CoinBelt({
         const used = slots.includes(digit);
         const next = nextHint === digit;
         const knockedOut = forceDead.includes(digit);
-        const fresh = hasGuess && signal.state === 'untested' && !knockedOut;
+        const fresh = signal.state === 'untested' && !knockedOut;
         const markClass = knockedOut
           ? null
           : fresh
@@ -329,13 +333,24 @@ export function CoinBelt({
             <button
               type="button"
               tabIndex={-1}
-              className={['coin', used && 'used', (knockedOut || (showMarks && signal.state === 'dead')) && 'dead', settledDead.has(digit) && 'settled', markClass, next && 'next', disabled && 'is-off', x > CX && 'tip-left', tourTip && 'has-tour-tip']
+              className={[
+                'coin',
+                used && 'used',
+                (knockedOut || (showMarks && signal.state === 'dead')) && 'dead',
+                settledDead.has(digit) && 'settled',
+                markClass,
+                markClass === 'active' && !showBars && 'rim-grey',
+                next && 'next',
+                disabled && 'is-off',
+                x > CX && 'tip-left',
+                tourTip && 'has-tour-tip',
+              ]
                 .filter(Boolean)
                 .join(' ')}
               style={{
                 left: x,
                 top: y,
-                ['--v' as string]: ring(signal, showBars),
+                ['--v' as string]: ring(signal, showBars, hasGuess && !showBars),
                 ['--g' as string]: warmth(signal, showMarks, showBars),
                 ['--lx' as string]: `${lx}px`,
                 ['--ly' as string]: `${ly}px`,
