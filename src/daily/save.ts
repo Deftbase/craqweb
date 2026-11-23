@@ -150,10 +150,11 @@ export function dailyShare(
   clockLabel: string | undefined,
   assistName: string,
   listenUrl?: string,
+  percentile?: string,
 ): string {
   const tries = history.length === 1 ? '1 try' : `${history.length} tries`;
   const rows = history.map((guess) => shareRow(guess.bulls, guess.cows)).join('\n');
-  const header = [`CRAQ ${tries}`, clockLabel, assistName].filter(Boolean).join(' · ');
+  const header = [`CRAQ ${tries}`, clockLabel, assistName, percentile].filter(Boolean).join(' · ');
   if (!listenUrl) return `${header}\n\n${rows}`;
   return `${header}\n\n${rows}\n\nPlay your break in\n${listenUrl}`;
 }

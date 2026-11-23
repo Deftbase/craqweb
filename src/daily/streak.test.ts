@@ -32,6 +32,12 @@ describe('daily streak', () => {
     });
   });
 
+  it('turns a visible 2-day carry into 3 on the next win day', () => {
+    const before = won('2026-11-21', 2, 2);
+    expect(visibleStreak(before, '2026-11-22')).toBe(2);
+    expect(streakAfterWin(before, '2026-11-22')).toEqual(won('2026-11-22', 3, 3));
+  });
+
   it('resets to 1 after a missed day', () => {
     expect(streakAfterWin(won('2026-11-16', 8, 8), '2026-11-19')).toEqual(won('2026-11-19', 1, 8));
   });

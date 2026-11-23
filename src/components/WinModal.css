@@ -180,12 +180,30 @@
   gap: 6px;
 }
 
+.win-rank-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
 .win-rank-tag {
   padding: 3px 10px;
   border-radius: 99px;
   font-size: 11px;
   letter-spacing: 1px;
   color: #fff;
+}
+
+.win-band {
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  color: var(--focus);
+  background: #e7f7fd;
+  border: 1px solid #bfe9f8;
 }
 
 .win-rank-tag-gold {

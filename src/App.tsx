@@ -27,6 +27,7 @@ import {
   todaySave,
   type GameMode,
 } from './daily/save';
+import { dailyPercentile } from './daily/percentile';
 import { loadStreak, recordDailyWin, streakLine, visibleStreak } from './daily/streak';
 import { loadTour, markTourDone } from './tour/save';
 import {
@@ -214,8 +215,11 @@ export default function App() {
   const assistRef = useRef(assist);
   assistRef.current = assist;
 
+  /** Peak assist only counts after the first submitted guess. Picker browsing before that is free. */
   useEffect(() => {
-    if (stateRef.current.status === 'playing') setPeakAssist((p) => strongerAssist(p, assist));
+    if (stateRef.current.status !== 'playing') return;
+    if (stateRef.current.history.length === 0) return;
+    setPeakAssist((p) => strongerAssist(p, assist));
   }, [assist]);
 
   const handleDigit = useCallback(
@@ -272,9 +276,11 @@ export default function App() {
       if (stateRef.current.status === 'playing') sfx.deny();
       return;
     }
+    const firstGuess = stateRef.current.history.length === 0;
     sfx.hiss();
     navigator.vibrate?.(35);
     actions.submit();
+    if (firstGuess) setPeakAssist(assistRef.current);
     setHighlight(null);
     refocus();
   }, [actions]);
@@ -431,8 +437,14 @@ export default function App() {
   useEffect(() => {
     if (mode !== 'daily' || state.status === 'playing' || clock.finished) return;
     setClock((c) => ({ ...c, lastSeen: Date.now(), finished: true }));
-    if (state.status === 'won') setStreak(recordDailyWin(dayKey()).current);
   }, [mode, state.status, clock.finished]);
+
+  /** Count the streak as soon as the vault cracks — not after the unlock animation. */
+  useEffect(() => {
+    if (mode !== 'daily') return;
+    if (state.status !== 'cracking' && state.status !== 'won') return;
+    setStreak(recordDailyWin(dayKey()).current);
+  }, [mode, state.status]);
 
   useEffect(() => {
     if (mode !== 'daily' || clock.finished || !clock.startedAt) return;
@@ -949,6 +961,11 @@ export default function App() {
           assist={peakAssist}
           timeLabel={mode === 'daily' ? formatClock(shownMs) : undefined}
           streakLabel={mode === 'daily' ? streakLine(streak) : undefined}
+          bandLabel={
+            mode === 'daily' && !tour
+              ? dailyPercentile(state.history.length, shownMs, peakAssist)
+              : undefined
+          }
           againLabel={
             tour === 'unlock'
               ? 'PLAY ANOTHER GAME'
@@ -970,6 +987,10 @@ export default function App() {
                   clockLabel: mode === 'daily' ? formatClock(shownMs) : undefined,
                   assistName: ASSIST_NAMES[peakAssist],
                   listenUrl: mode === 'daily' ? heistListenUrl(state.history) : undefined,
+                  percentile:
+                    mode === 'daily'
+                      ? dailyPercentile(state.history.length, shownMs, peakAssist)
+                      : undefined,
                 }
           }
           nextVault={mode === 'daily' && !tour}

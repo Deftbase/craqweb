@@ -13,10 +13,17 @@ export interface SharePayload {
   clockLabel?: string;
   assistName: string;
   listenUrl?: string;
+  percentile?: string;
 }
 
 export function shareCaption(payload: SharePayload) {
-  return dailyShare(payload.history, payload.clockLabel, payload.assistName, payload.listenUrl);
+  return dailyShare(
+    payload.history,
+    payload.clockLabel,
+    payload.assistName,
+    payload.listenUrl,
+    payload.percentile,
+  );
 }
 
 export function twitterShareUrl(text: string) {
@@ -145,9 +152,12 @@ async function renderShareGridPng(payload: SharePayload): Promise<Blob | null> {
   });
 
   const tries = payload.history.length === 1 ? '1 try' : `${payload.history.length} tries`;
+  const caption = [tries, payload.clockLabel, payload.assistName, payload.percentile]
+    .filter(Boolean)
+    .join('  ·  ');
   ctx.fillStyle = TEXT;
   ctx.font = '13px "Russo One", sans-serif';
-  ctx.fillText(`${tries}  ·  ${payload.clockLabel}  ·  ${payload.assistName}`, pad, gy + gridH + 28);
+  ctx.fillText(caption, pad, gy + gridH + 28);
 
   return new Promise((resolve) => {
     canvas.toBlob((blob) => resolve(blob), 'image/png');

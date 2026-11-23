@@ -25,6 +25,8 @@ interface Props {
   nextHint?: string;
   /** Daily streak on this browser. Absent in Practice. */
   streakLabel?: string;
+  /** Daily house-curve band. Absent in Practice. */
+  bandLabel?: string;
   /** Daily win card shows a countdown instead of new vault. */
   nextVault?: boolean;
 }
@@ -57,6 +59,7 @@ export function WinModal({
   lead,
   nextHint,
   streakLabel,
+  bandLabel,
   nextVault = false,
 }: Props) {
   const { title, blurb, tag } = rank(guesses);
@@ -139,7 +142,10 @@ export function WinModal({
         <p className="win-meta">{meta}</p>
         {streakLabel && <p className="win-streak">{streakLabel}</p>}
         <div className="win-rank">
-          <span className={`win-rank-tag win-rank-tag-${tag}`}>{title}</span>
+          <div className="win-rank-row">
+            <span className={`win-rank-tag win-rank-tag-${tag}`}>{title}</span>
+            {bandLabel && <span className="win-band">{bandLabel}</span>}
+          </div>
           <small>{blurb}</small>
         </div>
         {lead && <p className="win-lead">{lead}</p>}

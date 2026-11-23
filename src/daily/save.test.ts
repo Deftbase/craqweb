@@ -39,10 +39,16 @@ describe('daily share', () => {
       { bulls: 2, cows: 1 },
       { bulls: 4, cows: 0 },
     ];
-    const text = dailyShare(history, '02:06', 'Medium', 'https://craq.example/#heist=10-11-21-40');
+    const text = dailyShare(
+      history,
+      '02:06',
+      'Medium',
+      'https://craq.example/#heist=10-11-21-40',
+      'Top 25%',
+    );
     expect(text).toBe(
       [
-        'CRAQ 4 tries · 02:06 · Medium',
+        'CRAQ 4 tries · 02:06 · Medium · Top 25%',
         '',
         '🟢',
         '🟢🟡',
