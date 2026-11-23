@@ -42,7 +42,7 @@ function SampleCoins({ items }: { items: readonly TourCoinSample[] }) {
               coin.look === 'fade'
                 ? { ['--v' as string]: 0.22, ['--g' as string]: 0.19 }
                 : coin.look === 'polish'
-                  ? { ['--v' as string]: 0.82, ['--g' as string]: 0.94 }
+                  ? { ['--v' as string]: 0.68, ['--g' as string]: 0.85 }
                   : { ['--v' as string]: 1, ['--g' as string]: 1 }
             }
           >

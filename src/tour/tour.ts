@@ -219,7 +219,7 @@ const MEDIUM_SLIDES: readonly TourSlide[] = [
     body: 'After each guess, the likelihood ring grows or shrinks. Digits with low likelihood fade out slowly, while digits with higher likelihood look more polished.',
     coins: [
       { digit: 9, look: 'fade', label: '22% likely' },
-      { digit: 4, look: 'polish', label: '82% likely' },
+      { digit: 4, look: 'polish', label: '68% likely' },
     ],
   },
   { assistLevel: 'medium', body: 'See it live. Try 0 3 7 9.', digits: ASSIST_GUESSES[1] },

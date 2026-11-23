@@ -19,8 +19,8 @@ export type DigitState = 'untested' | 'dead' | 'active' | 'locked';
 
 /**
  * How much the keypad helps, weakest first: solo shows nothing, light shows
- * facts straight from the log, medium adds likelihood bars, heavy adds the
- * deduction rules.
+ * facts straight from the log, medium adds likelihood bars and soft-locks
+ * Rules 1–5 at 91%, heavy hard-locks those same rules at 100%.
  */
 export type AssistLevel = 'solo' | 'light' | 'medium' | 'heavy';
 export const ASSIST_LEVELS: readonly AssistLevel[] = ['solo', 'light', 'medium', 'heavy'];
@@ -28,7 +28,7 @@ export const ASSIST_LEVELS: readonly AssistLevel[] = ['solo', 'light', 'medium',
 export interface DigitSignal {
   digit: number;
   state: DigitState;
-  /** Display strength 0..1: 0 for dead, 1 for locked, clamped 0.12..0.9 otherwise. */
+  /** Display strength 0..1: 0 dead, 1 locked, 0.91 Medium-deduced, else soft pack. */
   value: number;
   /** Raw share of remaining digit sets containing this digit. */
   ratio: number;

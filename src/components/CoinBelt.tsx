@@ -127,7 +127,9 @@ function tipFor(signal: DigitSignal, showBars: boolean): string | null {
     case 'locked':
       return '100% · in the code';
     case 'active':
-      return showBars ? `${Math.round(signal.value * 100)}% likely` : null;
+      if (!showBars) return null;
+      if (signal.value >= 0.91) return '91% · in the code';
+      return `${Math.round(signal.value * 100)}% likely`;
   }
 }
 

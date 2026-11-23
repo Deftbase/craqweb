@@ -1,10 +1,16 @@
 import { DIGITS, type AssistLevel, type DigitSignal, type GuessRecord } from './types';
 
 export const SIGNAL_FLOOR = 0.07;
-export const SIGNAL_CEILING = 0.9;
+/** Soft max for still-in-play digits that are not rule-deduced or locked. */
+export const SIGNAL_CEILING = 0.75;
 /**
- * Shown for digits every remaining digit set contains. Only the rules in
- * `certainDigits` earn a full 100% lock.
+ * How much raw ratio above the weakest in-play digit can show through.
+ * 0 = flat shared cap; 1 = no compress.
+ */
+export const SIGNAL_COMPRESS = 0.45;
+/**
+ * Medium soft-lock for digits Rules 1–5 prove are in the code.
+ * Heavy promotes the same facts to a full 100% lock.
  */
 export const DEDUCED_VALUE = 0.91;
 
@@ -29,32 +35,55 @@ export function digitSetsFromHistory(history: readonly GuessRecord[]): number[][
 }
 
 /**
- * Per-digit signal. Likelihoods only use which digits are in the code (hit
- * totals), never positions, so a player can follow every bar by reasoning.
- * Only the heavy assist level runs the deduction rules; lower levels mark just
- * what the log states outright. How much of this to display is up to the UI.
+ * Per-digit signal. Likelihoods use digit-set frequencies (hit totals), with a
+ * soft-compress pack. Certainty rules mark dead / deduced / locked depending
+ * on assist: Light = log facts only; Medium = Rules 1–5 as 91% soft locks;
+ * Heavy = Rules 1–5 as 100% locks.
  */
 export function computeSpectrum(history: readonly GuessRecord[], assist: AssistLevel = 'heavy'): DigitSignal[] {
   const tested = new Set<number>();
   for (const h of history) h.guess.forEach((d) => tested.add(d));
-  const { out, inCode } = certainDigits(history, assist === 'heavy');
+
+  const base = certainDigits(history, false);
+  const deduce = assist === 'medium' || assist === 'heavy';
+  const full = deduce ? certainDigits(history, true) : base;
 
   const sets = digitSetsFromHistory(history);
   const counts = new Array<number>(10).fill(0);
   for (const s of sets) for (const d of s) counts[d]++;
   const total = sets.length;
 
+  // Anchor the pack at the weakest still-in-play ratio, then soft-compress.
+  // Skip dead / locked / Medium-deduced digits — they break out of the pack.
+  let sharedCap = 1;
+  if (total > 0) {
+    let minInPlay = Infinity;
+    for (const d of DIGITS) {
+      if (full.out.has(d) || full.inCode.has(d) || counts[d] === 0) continue;
+      minInPlay = Math.min(minInPlay, counts[d] / total);
+    }
+    if (minInPlay !== Infinity) sharedCap = minInPlay;
+  }
+
   return DIGITS.map((digit) => {
     const ratio = total ? counts[digit] / total : 0;
+    const stateBase = tested.has(digit) ? 'active' : 'untested';
 
-    // Only the explicit certainty rules mark digits dead or locked; anything
-    // the digit sets imply beyond them stays within the floor/91% range.
-    if (out.has(digit)) return { digit, state: 'dead', value: 0, ratio };
-    if (inCode.has(digit)) return { digit, state: 'locked', value: 1, ratio };
+    if (full.out.has(digit)) return { digit, state: 'dead', value: 0, ratio };
 
-    const deduced = total > 0 && counts[digit] === total;
-    const value = deduced ? DEDUCED_VALUE : Math.min(SIGNAL_CEILING, Math.max(SIGNAL_FLOOR, ratio));
-    return { digit, state: tested.has(digit) ? 'active' : 'untested', value, ratio };
+    // Log fact (4 in the code) is always a hard lock on Light+.
+    if (base.inCode.has(digit)) return { digit, state: 'locked', value: 1, ratio };
+
+    // Rules 1–5: Heavy locks; Medium soft-locks at 91%.
+    if (full.inCode.has(digit)) {
+      if (assist === 'heavy') return { digit, state: 'locked', value: 1, ratio };
+      if (assist === 'medium') return { digit, state: stateBase, value: DEDUCED_VALUE, ratio };
+    }
+
+    const compressed =
+      ratio <= sharedCap ? ratio : sharedCap + SIGNAL_COMPRESS * (ratio - sharedCap);
+    const value = Math.min(SIGNAL_CEILING, Math.max(SIGNAL_FLOOR, compressed));
+    return { digit, state: stateBase, value, ratio };
   });
 }
 
@@ -68,6 +97,8 @@ export function computeSpectrum(history: readonly GuessRecord[], assist: AssistL
  *   - Rule 3: 4 locked strikes the other 6; 6 struck locks the other 4
  *   - Rule 4: two guesses with no shared digit leave 2 untouched digits, which are
  *     struck if their hits sum to 4, or locked if they sum to 2
+ *   - Rule 5: two guesses that differ by one slot; safe in-place/misplaced deltas
+ *     lock/strike the swapped digits
  */
 export function certainDigits(
   history: readonly GuessRecord[],
@@ -116,6 +147,40 @@ export function certainDigits(
     for (const { digits, hits } of leftovers) {
       if (hits === 4) mark(out, digits);
       if (hits === 2) mark(inCode, digits);
+    }
+
+    // Rule 5: one-slot neighbors — compare in place / misplaced deltas.
+    for (let i = 0; i < history.length; i++) {
+      for (let j = i + 1; j < history.length; j++) {
+        const A = history[i];
+        const B = history[j];
+        const diffs: number[] = [];
+        for (let p = 0; p < A.guess.length; p++) {
+          if (A.guess[p] !== B.guess[p]) diffs.push(p);
+        }
+        if (diffs.length !== 1) continue;
+        const a = A.guess[diffs[0]];
+        const b = B.guess[diffs[0]];
+        const db = B.bulls - A.bulls;
+        const dc = B.cows - A.cows;
+        if (db === -1 && dc === 0) {
+          mark(inCode, [a]);
+          mark(out, [b]);
+        } else if (db === 1 && dc === 0) {
+          mark(inCode, [b]);
+          mark(out, [a]);
+        } else if (db === 0 && dc === -1) {
+          mark(inCode, [a]);
+          mark(out, [b]);
+        } else if (db === 0 && dc === 1) {
+          mark(inCode, [b]);
+          mark(out, [a]);
+        } else if (db === -1 && dc === 1) {
+          mark(inCode, [a, b]);
+        } else if (db === 1 && dc === -1) {
+          mark(inCode, [a, b]);
+        }
+      }
     }
 
     if (inCode.size === 4) mark(out, DIGITS.filter((d) => !inCode.has(d)));

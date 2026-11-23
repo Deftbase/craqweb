@@ -126,7 +126,7 @@ describe('spectrum', () => {
     for (const d of s) {
       if (d.state === 'active') {
         expect(d.value).toBeGreaterThanOrEqual(0.07);
-        expect(d.value).toBeLessThanOrEqual(0.91);
+        expect(d.value).toBeLessThanOrEqual(0.75);
       }
     }
   });
@@ -150,14 +150,56 @@ describe('spectrum', () => {
     expect(states(s, [0, 1, 2, 4])).toEqual(Array(4).fill('dead'));
   });
 
-  it('shows deduced-but-unconfirmed digits at 91% without locking them', () => {
+  it('does not soft-lock universal set digits without a certainty rule', () => {
     const history = [
       { guess: [0, 1, 2, 3], bulls: 0, cows: 2 },
       { guess: [4, 5, 6, 7], bulls: 1, cows: 1 },
     ];
-    const s = computeSpectrum(history);
+    const s = computeSpectrum(history, 'medium');
     expect(s.some((d) => d.state === 'locked')).toBe(false);
-    expect(s.every((d) => d.value <= 0.91)).toBe(true);
+    expect(s.every((d) => d.value !== 0.91 || d.state === 'dead')).toBe(true);
+    expect(s.filter((d) => d.state !== 'dead').every((d) => d.value <= 0.75 || d.value === 0.91)).toBe(true);
+  });
+
+  it('soft-compresses the pack toward the weakest ratio under the 75% ceiling', () => {
+    const s = spectrumOf([
+      { guess: [3, 2, 1, 5], bulls: 1, cows: 0 },
+      { guess: [0, 9, 1, 2], bulls: 2, cows: 0 },
+      { guess: [4, 9, 1, 6], bulls: 2, cows: 0 },
+    ]);
+    const inPlay = s.filter(
+      (d) => d.state !== 'dead' && d.state !== 'locked' && d.value < 0.91 && d.ratio > 0,
+    );
+    const sharedCap = Math.min(...inPlay.map((d) => d.ratio));
+    for (const d of inPlay) {
+      const compressed =
+        d.ratio <= sharedCap ? d.ratio : sharedCap + 0.45 * (d.ratio - sharedCap);
+      expect(d.value).toBeCloseTo(Math.min(0.75, Math.max(0.07, compressed)));
+      expect(d.value).toBeLessThanOrEqual(0.75);
+      expect(d.value).toBeGreaterThanOrEqual(0.07);
+    }
+  });
+
+  it('Rule 5: one-slot swap locks on Heavy and soft-locks on Medium', () => {
+    const history = [
+      { guess: [1, 2, 3, 4], bulls: 0, cows: 1 },
+      { guess: [0, 9, 8, 7], bulls: 3, cows: 0 },
+      { guess: [0, 9, 8, 3], bulls: 2, cows: 0 },
+    ];
+    const heavy = computeSpectrum(history, 'heavy');
+    expect(heavy[7].state).toBe('locked');
+    expect(heavy[7].value).toBe(1);
+    expect(heavy[3].state).toBe('dead');
+
+    const medium = computeSpectrum(history, 'medium');
+    expect(medium[7].state).not.toBe('locked');
+    expect(medium[7].value).toBe(0.91);
+    expect(medium[3].state).toBe('dead');
+
+    const light = computeSpectrum(history, 'light');
+    expect(light[7].value).toBeLessThan(0.91);
+    expect(light[7].state).not.toBe('locked');
+    expect(light[3].state).not.toBe('dead');
   });
 
   it('ignores positions: a digit only positional logic proves stays uncertain', () => {
@@ -168,7 +210,12 @@ describe('spectrum', () => {
       { guess: [7, 5, 1, 0], bulls: 0, cows: 3 },
       { guess: [0, 7, 5, 6], bulls: 2, cows: 1 },
     ]);
-    [0, 5, 7].forEach((d) => expect(s[d].value).toBe(0.91));
+    // Universal in every remaining set alone is not a rule soft-lock.
+    [0, 5, 7].forEach((d) => {
+      expect(s[d].ratio).toBe(1);
+      expect(s[d].state).not.toBe('locked');
+      expect(s[d].value).toBeLessThan(0.91);
+    });
     expect(s[2].value).toBeCloseTo(0.5);
     expect(s[9].value).toBeCloseTo(0.5);
     [1, 4, 6, 8].forEach((d) => expect(s[d].value).toBe(0.07));
@@ -187,11 +234,16 @@ describe('spectrum', () => {
     expect(states(s, [1, 5, 3, 6, 8])).toEqual(Array(5).fill('dead'));
   });
 
-  it('only marks log facts below heavy assist', () => {
-    for (const level of ['light', 'medium'] as const) {
-      const s = computeSpectrum(yourGame, level);
-      expect(s.some((d) => d.state === 'dead' || d.state === 'locked')).toBe(false);
-    }
+  it('Medium soft-locks Rules 1–5 at 91%; Light stays on log facts only', () => {
+    const medium = computeSpectrum(yourGame, 'medium');
+    expect(medium[2].value).toBe(0.91);
+    expect(medium[0].value).toBe(0.91);
+    expect(medium[2].state).not.toBe('locked');
+    expect(states(medium, [1, 5, 3, 6, 8])).toEqual(Array(5).fill('dead'));
+
+    const light = computeSpectrum(yourGame, 'light');
+    expect(light.some((d) => d.state === 'dead' || d.state === 'locked')).toBe(false);
+
     const s = computeSpectrum([{ guess: [1, 2, 3, 4], bulls: 0, cows: 0 }], 'medium');
     expect(states(s, [1, 2, 3, 4])).toEqual(Array(4).fill('dead'));
     const four = computeSpectrum([{ guess: [1, 2, 3, 4], bulls: 1, cows: 3 }], 'light');
