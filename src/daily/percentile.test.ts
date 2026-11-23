@@ -20,10 +20,10 @@ describe('dailyPercentile', () => {
     expect(dailyPercentile(5, 4 * 60_000 + 1, 'medium')).toBe('Top 50%');
   });
 
-  it('gives Heavy and Solo the Top 75% ceilings', () => {
+  it('gives Heavy and Solo the Top 75% ceilings and hides anything slower', () => {
     expect(dailyPercentile(10, 10 * 60_000, 'heavy')).toBe('Top 75%');
     expect(dailyPercentile(12, 12 * 60_000, 'solo')).toBe('Top 75%');
-    expect(dailyPercentile(13, 60_000, 'solo')).toBe('Top 100%');
+    expect(dailyPercentile(13, 60_000, 'solo')).toBeNull();
   });
 
   it('does not give Light or Heavy a Top 5% band', () => {

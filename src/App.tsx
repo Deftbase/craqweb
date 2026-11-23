@@ -963,7 +963,7 @@ export default function App() {
           streakLabel={mode === 'daily' ? streakLine(streak) : undefined}
           bandLabel={
             mode === 'daily' && !tour
-              ? dailyPercentile(state.history.length, shownMs, peakAssist)
+              ? dailyPercentile(state.history.length, shownMs, peakAssist) ?? undefined
               : undefined
           }
           againLabel={
@@ -989,7 +989,7 @@ export default function App() {
                   listenUrl: mode === 'daily' ? heistListenUrl(state.history) : undefined,
                   percentile:
                     mode === 'daily'
-                      ? dailyPercentile(state.history.length, shownMs, peakAssist)
+                      ? dailyPercentile(state.history.length, shownMs, peakAssist) ?? undefined
                       : undefined,
                 }
           }

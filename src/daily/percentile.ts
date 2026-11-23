@@ -1,6 +1,7 @@
 import type { AssistLevel } from '../engine';
 
-export type PercentileBand = 'Top 5%' | 'Top 10%' | 'Top 25%' | 'Top 50%' | 'Top 75%' | 'Top 100%';
+/** Shown bands only. Outside Top 75% returns null — no badge, no share mention. */
+export type PercentileBand = 'Top 5%' | 'Top 10%' | 'Top 25%' | 'Top 50%' | 'Top 75%';
 
 type Cap = { tries: number; ms: number };
 
@@ -32,18 +33,16 @@ const CAPS: Record<PercentileBand, Partial<Record<AssistLevel, Cap>>> = {
     medium: { tries: 10, ms: 10 * 60_000 },
     heavy: { tries: 10, ms: 10 * 60_000 },
   },
-  'Top 100%': {},
 };
 
-const ORDER: PercentileBand[] = ['Top 5%', 'Top 10%', 'Top 25%', 'Top 50%', 'Top 75%', 'Top 100%'];
+const ORDER: PercentileBand[] = ['Top 5%', 'Top 10%', 'Top 25%', 'Top 50%', 'Top 75%'];
 
-export function dailyPercentile(tries: number, ms: number, assist: AssistLevel): PercentileBand {
+export function dailyPercentile(tries: number, ms: number, assist: AssistLevel): PercentileBand | null {
   const elapsed = Math.max(0, ms);
   const guesses = Math.max(0, tries);
   for (const band of ORDER) {
-    if (band === 'Top 100%') return band;
     const cap = CAPS[band][assist];
     if (cap && guesses <= cap.tries && elapsed <= cap.ms) return band;
   }
-  return 'Top 100%';
+  return null;
 }
